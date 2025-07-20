@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { generatePortfolioHTML } from '../../lib/portfolioTemplate'; 
+import { templates, TemplateKey } from '../../lib/templates'; 
 
 export default function Home() {
   const [inputs, setInputs] = useState({
@@ -18,9 +18,17 @@ export default function Home() {
   // プレビューの表示/非表示を管理するState (デフォルトは表示)
   const [isPreviewVisible, setIsPreviewVisible] = useState(true);
   // --- ここまで ---
+// --- ここからが追加部分 ---
+  // 選択されているテンプレートのIDを管理するState
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('stylish');
+  // --- ここまで ---
 
+  // useEffectの依存配列に selectedTemplate を追加
   useEffect(() => {
-    const htmlContent = generatePortfolioHTML(inputs);
+    // 選択されたテンプレートの生成関数を取得
+    const generateHTML = templates[selectedTemplate].generate;
+    const htmlContent = generateHTML(inputs);
+    
     const blob = new Blob([htmlContent], { type: 'text/html' });
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -31,7 +39,9 @@ export default function Home() {
     return () => {
       URL.revokeObjectURL(newUrl);
     };
-  }, [inputs]);
+  // `inputs` または `selectedTemplate` が変更されたときに再実行
+  }, [inputs, selectedTemplate]); 
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -42,7 +52,9 @@ export default function Home() {
   };
 
   const handleDownload = () => {
-    const htmlContent = generatePortfolioHTML(inputs);
+    // ダウンロード時も選択されたテンプレートを使用
+    const generateHTML = templates[selectedTemplate].generate;
+    const htmlContent = generateHTML(inputs);
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -69,7 +81,24 @@ export default function Home() {
           >
             {isPreviewVisible ? 'プレビューを隠す' : 'プレビューを表示'}
           </button>
-          {/* --- ここまで --- */}
+          
+            {/* テンプレート選択ドロップダウン */}
+            <div>
+              <label htmlFor="template-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>テンプレート:</label>
+              <select
+                id="template-select"
+                value={selectedTemplate}
+                onChange={(e) => setSelectedTemplate(e.target.value as TemplateKey)}
+                style={{ padding: '8px' }}
+              >
+                {/* templatesオブジェクトから選択肢を動的に生成 */}
+                {Object.keys(templates).map((key) => (
+                  <option key={key} value={key}>
+                    {templates[key as TemplateKey].name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
           <p style={{ marginTop: '0', color: '#666', paddingBottom: '20px' }}>左で編集すると、右のプレビューがリアルタイムで更新されます。</p>
           
