@@ -7,8 +7,12 @@ interface PortfolioData {
 }
 
 // --- テンプレート1: スタイリッシュ ---
-const generateStylishContent = (data: PortfolioData) => {
-  // HTML: <style>タグを削除し、代わりに<link>タグと<script>タグで外部ファイルを読み込む
+const generateStylishContent = (data: PortfolioData, imageFileName?: string) => {
+  // 画像が指定されていれば<img>タグを生成、なければ空文字
+  const imageTag = imageFileName
+    ? `<img src="img/${imageFileName}" alt="プロフィール写真" class="profile-image">`
+    : '';
+
   const html = `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -19,6 +23,7 @@ const generateStylishContent = (data: PortfolioData) => {
 </head>
 <body>
   <div class="container">
+    ${imageTag}
     <h1>${data.yourName}</h1>
     <p class="catchphrase">${data.catchphrase}</p>
     <div class="faq-section">
@@ -41,7 +46,6 @@ const generateStylishContent = (data: PortfolioData) => {
 </body>
 </html>`;
 
-  // CSS: HTMLから分離したスタイルをここに記述
   const css = `body {
   font-family: 'Helvetica Neue', 'Arial', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
   line-height: 1.8;
@@ -89,9 +93,18 @@ h1 {
   background-color: #f3f3f3;
   border-radius: 5px;
   white-space: pre-wrap;
+}
+.profile-image {
+  display: block;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 20px;
+  border: 4px solid #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }`;
 
-  // JavaScript: 外部ファイル用のJSコード
   const js = `document.addEventListener('DOMContentLoaded', () => {
   console.log('ポートフォリオサイトへようこそ！');
   const heading = document.querySelector('h1');
@@ -106,8 +119,11 @@ h1 {
 };
 
 // --- テンプレート2: シンプル ---
-const generateSimpleContent = (data: PortfolioData) => {
-  // HTML: こちらも同様に<link>と<script>で外部ファイルを指定
+const generateSimpleContent = (data: PortfolioData, imageFileName?: string) => {
+  const imageTag = imageFileName
+    ? `<img src="img/${imageFileName}" alt="プロフィール写真" class="profile-image">`
+    : '';
+
   const html = `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -117,6 +133,7 @@ const generateSimpleContent = (data: PortfolioData) => {
 </head>
 <body>
   <div class="container">
+    ${imageTag}
     <h1>${data.yourName}</h1>
     <h2>自己紹介</h2>
     <p>${data.catchphrase}</p>
@@ -132,7 +149,6 @@ const generateSimpleContent = (data: PortfolioData) => {
 </body>
 </html>`;
   
-  // CSS: HTMLから分離したスタイル
   const css = `body {
   font-family: "MS PMincho", "Hiragino Mincho ProN", serif;
   line-height: 2;
@@ -156,13 +172,19 @@ h2 {
 }
 p {
   text-indent: 1em;
+}
+.profile-image {
+  display: block;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 30px;
 }`;
 
-  // JavaScript: 外部ファイル用のJSコード
   const js = `console.log('ページが読み込まれました。');`;
 
   return { html, css, js };
 };
+
 
 // --- エクスポート部分 ---
 export const templates = {
