@@ -33,20 +33,29 @@ export default function Home() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      const fetchProfile = async () => {
+   if (status === 'authenticated' && session) {
+    const fetchProfile = async () => {
+      try {
         const res = await fetch('/api/profile');
         if (res.ok) {
           const data = await res.json();
           // 取得したデータでstateを更新
           setInputs(data.content);
           setSelectedTemplate(data.templateId);
-          // TODO: 画像を復元できるようにする
+        } else if (res.status === 404) {
+          // データがまだ保存されていない場合は何もしない
+          console.log('No profile data found for this user.');
+        } else {
+          // その他のサーバーエラー
+          console.error('Failed to fetch profile data.');
         }
-      };
-      fetchProfile();
-    }
-  }, [status]); 
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
+    fetchProfile();
+  }
+}, [status, session]); // statusかsessionが変わった時に実行
 
 
   useEffect(() => {
@@ -95,13 +104,19 @@ export default function Home() {
   }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents]);
 
 
-  // ▼▼▼ ここに handleSave 関数を移動させる ▼▼▼
   const handleSave = async () => {
-    const dataToSave = {
-      content: inputs,
-      templateId: selectedTemplate,
-    };
+  // ログインしていない場合は処理を中断
+  if (!session) {
+    alert('保存するにはログインが必要です。');
+    return;
+  }
 
+  const dataToSave = {
+    content: inputs,
+    templateId: selectedTemplate,
+  };
+
+  try {
     const res = await fetch('/api/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -113,7 +128,11 @@ export default function Home() {
     } else {
       alert('保存に失敗しました。');
     }
-  };
+  } catch (error) {
+    console.error('Save failed:', error);
+    alert('通信エラーにより保存に失敗しました。');
+  }
+};
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -343,7 +362,7 @@ export default function Home() {
               onClick={handleSave}
               style={{ flex: 1, padding: '15px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '5px' }}
             >
-              💾 内容を保存
+              💾 保存
             </button>
             <button
               onClick={handleDownload}

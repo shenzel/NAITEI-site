@@ -1,6 +1,6 @@
 // src/pages/api/auth/[...nextauth].ts
 
-import NextAuth,{User} from "next-auth"
+import NextAuth from "next-auth"
 import GithubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from 'next-auth/providers/credentials'; 
@@ -40,7 +40,7 @@ export const authOptions = {
           return null;
         }
         return {
-          id: user.email,
+          id: credentials.email,
           email: user.email,
         };
       },
@@ -50,8 +50,9 @@ export const authOptions = {
 
   callbacks: {
     //JWTが作成/更新されたときに呼ばれる
-    jwt({ token, user}: { token: JWT; user?: User }) {
+    jwt({ token, user}: {token:JWT, user?: {id:string}}) {
       if (user) {
+           console.log("✅ jwt user:", user); // ← 一時的にデバッグログ追加
         token.id = user.id;
       }
       return token;
