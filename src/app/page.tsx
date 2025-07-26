@@ -1,10 +1,15 @@
 "use client";
+import {useSession, signIn, signOut} from "next-auth/react"
 
 import { useState, useEffect, ChangeEvent } from 'react';
 import { templates, TemplateKey } from '../../lib/templates';
 import JSZip from 'jszip';
+import Link from "next/link";
 
 export default function Home() {
+
+  const { data: session, status} = useSession()
+
   // ユーザーの入力値を管理するState
   const [inputs, setInputs] = useState({
     yourName: '山田 太郎',
@@ -158,6 +163,45 @@ export default function Home() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+
+    if (status === "loading") {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        Loading...
+      </div>
+    );
+  }
+
+  // ログインしていない場合の表示
+  if (!session) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <p>このアプリを利用するにはログインが必要です。</p>
+        <button onClick={() => signIn("github")} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+          Sign in with GitHub
+        </button>
+
+        <button onClick={() => signIn("google")} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+        Sign in with Google
+      </button>
+      <hr />
+
+      <h3>Emailとパスワードでログイン</h3>
+      <form onSubmit={async (e) => {
+        e.preventDefault();
+        const email = e.currentTarget.email.value;
+        const password = e.currentTarget.password.value;
+        await signIn('credentials', { email, password, redirect: false });
+      }}>
+        <input name="email" type="email" placeholder="Email" />
+        <input name="password" type="password" placeholder="Password" />
+        <button type="submit">Sign in</button>
+      </form>
+       <p style={{marginTop: '20px'}}><Link href="/register">アカウントをお持ちでないですか？ 新規登録</Link></p>
+      </div>
+    );
+  }
 
   // 画面の描画
   return (
