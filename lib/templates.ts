@@ -1,3 +1,4 @@
+
 interface PortfolioData {
   yourName: string;
   hometown: string;
@@ -9,8 +10,8 @@ interface PortfolioData {
   self_pr: string;
 }
 
-// --- テンプレート1: スタイリッシュ ---
-const generateStylishContent = (data: PortfolioData, imageFileName?: string) => {
+
+const getHtml = (data: PortfolioData, imageFileName?: string) => {
   const imageTag = imageFileName ? `<img src="img/${imageFileName}" alt="プロフィール写真" class="profile-image">` : '';
 
   // ▼▼▼ hobbyとskillのリストを動的に生成 ▼▼▼
@@ -126,6 +127,12 @@ const generateStylishContent = (data: PortfolioData, imageFileName?: string) => 
 </body>
 </html>`;
 
+return html
+}
+// --- テンプレート1: スタイリッシュ ---
+const generatePatern1 = (data: PortfolioData, imageFileName?: string) => {
+
+  const html = getHtml(data, imageFileName)
   const css = `/* General */
 * {
     box-sizing: border-box;
@@ -402,34 +409,8 @@ footer {
 };
 
 // --- テンプレート2: シンプル ---
-const generateSimpleContent = (data: PortfolioData, imageFileName?: string) => {
-  const imageTag = imageFileName
-    ? `<img src="img/${imageFileName}" alt="プロフィール写真" class="profile-image">`
-    : '';
-
-  const html = `<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>${data.yourName}のポートフォリオ</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    ${imageTag}
-    <h1>${data.yourName}</h1>
-    <hr>
-    <h2>プロフィール</h2>
-    <ul>
-      <li><strong>大学:</strong> ${data.university} ${data.faculty}</li>
-      <li><strong>出身:</strong> ${data.hometown}</li>
-      <li><strong>将来の夢:</strong> ${data.dream}</li>
-      <li><strong>趣味:</strong> ${data.hobby.join('、 ')}</li>
-    </ul>
-  </div>
-  <script src="script.js"></script>
-</body>
-</html>`;
+const generatePatern2 = (data: PortfolioData, imageFileName?: string) => {
+  const html = getHtml(data, imageFileName)
   
   const css = `body {
   font-family: "MS PMincho", "Hiragino Mincho ProN", serif;
@@ -476,12 +457,12 @@ li {
 // --- エクスポート部分 ---
 export const templates = {
   stylish: {
-    name: 'スタイリッシュ ✨',
-    generate: generateStylishContent,
+    name: '色1 ✨',
+    generate: generatePatern1,
   },
   simple: {
-    name: 'シンプル 📄',
-    generate: generateSimpleContent,
+    name: '色2 📄',
+    generate: generatePatern2,
   },
 };
 
