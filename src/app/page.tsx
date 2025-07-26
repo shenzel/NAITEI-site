@@ -8,10 +8,11 @@ export default function Home() {
   // ユーザーの入力値を管理するState
   const [inputs, setInputs] = useState({
     yourName: '山田 太郎',
-    catchphrase: '継続的な学習意欲で、新しい価値を創造します。',
-    strengthAndWeakness: '長所は目標達成に向けた粘り強さです。短所は時に慎重になりすぎることですが、リスク管理能力として活かせると考えています。',
-    mostDevotedThing: '大学時代のハッカソンチームでの経験です。リーダーとしてチームをまとめ、3日間でアプリを開発・発表し、準優勝を果たしました。',
-    companyAttraction: '貴社の「テクノロジーで人々の生活を豊かにする」という理念に深く共感しています。特に、〇〇というプロダクトが解決している課題に感銘を受けました。',
+    hometown: '東京都',
+    university: '東京大学', 
+    faculty: '理科一類',
+    dream: 'データサイエンティスト',
+    hobby: ['競技プログラミング', '釣り']
   });
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -175,20 +176,20 @@ export default function Home() {
               <input type="text" name="yourName" value={inputs.yourName} onChange={handleChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>キャッチフレーズ</label>
-              <input type="text" name="catchphrase" value={inputs.catchphrase} onChange={handleChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+              <label style={{fontWeight: 'bold'}}>出身地</label>
+              <input type="text" name="catchphrase" value={inputs.hometown} onChange={handleChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>あなたの長所と短所を教えてください。</label>
-              <textarea name="strengthAndWeakness" value={inputs.strengthAndWeakness} onChange={handleChange} rows={5} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+              <label style={{fontWeight: 'bold'}}>出身大学</label>
+              <textarea name="strengthAndWeakness" value={inputs.university} onChange={handleChange} rows={5} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>学生時代に最も打ち込んだことは何ですか？</label>
-              <textarea name="mostDevotedThing" value={inputs.mostDevotedThing} onChange={handleChange} rows={5} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+              <label style={{fontWeight: 'bold'}}>学部・学科</label>
+              <textarea name="mostDevotedThing" value={inputs.faculty} onChange={handleChange} rows={5} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>当社のどのような点に魅力を感じましたか？</label>
-              <textarea name="companyAttraction" value={inputs.companyAttraction} onChange={handleChange} rows={5} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+              <label style={{fontWeight: 'bold'}}>将来の夢</label>
+              <textarea name="companyAttraction" value={inputs.dream} onChange={handleChange} rows={5} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
 
             <button

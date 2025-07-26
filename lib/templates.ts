@@ -1,9 +1,10 @@
 interface PortfolioData {
-  yourName: string;
-  catchphrase: string;
-  strengthAndWeakness: string;
-  mostDevotedThing: string;
-  companyAttraction: string;
+    yourName: string,
+    hometown: string,
+    university: string, 
+    faculty: string,
+    dream: string,
+    hobby: string[],
 }
 
 // --- テンプレート1: スタイリッシュ ---
@@ -25,20 +26,20 @@ const generateStylishContent = (data: PortfolioData, imageFileName?: string) => 
   <div class="container">
     ${imageTag}
     <h1>${data.yourName}</h1>
-    <p class="catchphrase">${data.catchphrase}</p>
+    <p class="catchphrase">${data.faculty}</p>
     <div class="faq-section">
       <h2>よくあるご質問 (FAQ)</h2>
       <div class="faq-item">
         <h3>あなたの長所と短所を教えてください。</h3>
-        <p>${data.strengthAndWeakness.replace(/\n/g, '<br>')}</p>
+        <p>${data.university.replace(/\n/g, '<br>')}</p>
       </div>
       <div class="faq-item">
         <h3>学生時代に最も打ち込んだことは何ですか？</h3>
-        <p>${data.mostDevotedThing.replace(/\n/g, '<br>')}</p>
+        <p>${data.hometown.replace(/\n/g, '<br>')}</p>
       </div>
       <div class="faq-item">
         <h3>当社のどのような点に魅力を感じましたか？</h3>
-        <p>${data.companyAttraction.replace(/\n/g, '<br>')}</p>
+        <p>${data.hobby}</p>
       </div>
     </div>
   </div>
@@ -136,14 +137,14 @@ const generateSimpleContent = (data: PortfolioData, imageFileName?: string) => {
     ${imageTag}
     <h1>${data.yourName}</h1>
     <h2>自己紹介</h2>
-    <p>${data.catchphrase}</p>
+    <p>${data.university}</p>
     <h2>よくあるご質問</h2>
     <h3>長所と短所</h3>
-    <p>${data.strengthAndWeakness.replace(/\n/g, '<br>')}</p>
+    <p>${data.dream.replace(/\n/g, '<br>')}</p>
     <h3>学生時代に最も打ち込んだこと</h3>
-    <p>${data.mostDevotedThing.replace(/\n/g, '<br>')}</p>
+    <p>${data.hometown.replace(/\n/g, '<br>')}</p>
     <h3>当社への魅力</h3>
-    <p>${data.companyAttraction.replace(/\n/g, '<br>')}</p>
+    <p>${data.faculty.replace(/\n/g, '<br>')}</p>
   </div>
   <script src="script.js"></script>
 </body>
