@@ -5,7 +5,7 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { templates, TemplateKey } from '../../lib/templates';
 import JSZip from 'jszip';
 import Link from "next/link";
-import ProofreadingPopUp from '../components/ProofreadingPopUp';
+import ProofreadingButton from '../components/ProofreadingButton';
 
 export default function Home() {
 
@@ -28,7 +28,6 @@ export default function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('stylish');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [proofreadingLoading, setProofreadingLoading] = useState<{[key: string]: boolean}>({}); // 校正中のロード状態を管理するやつ
 
   useEffect(()=> {
     if (status === "authenticated"){
@@ -45,14 +44,6 @@ export default function Home() {
       fetchProfile();
     }
   },[status]); 
-  
-  // モーダル関連のState
-  const [modalState, setModalState] = useState({
-    isOpen: false,
-    originalText: '',
-    correctedText: '',
-    fieldName: ''
-  });
 
 useEffect(() => {
   const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
@@ -133,72 +124,6 @@ useEffect(() => {
   const handleSkillChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setInputs(prev => ({ ...prev, skill: value.split(',').map(item => item.trim()) }));
-  };
-
-  // 校正ボタンの関数
-  const getProofreadButtonStyle = (isLoading: boolean, hasText: boolean) => ({
-    padding: '8px 12px',
-    backgroundColor: isLoading ? '#ccc' : '#4CAF50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: isLoading ? 'not-allowed' : 'pointer',
-    fontSize: '12px',
-    whiteSpace: 'nowrap' as const
-  });
-
-  const handleProofread = async (fieldName: string) => {
-    const currentText = inputs[fieldName as keyof typeof inputs];
-    if (!currentText.trim()) return;
-
-    setProofreadingLoading(prev => ({ ...prev, [fieldName]: true }));
-    
-    try {
-      const response = await fetch('/api', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: currentText }),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        // モーダルを表示して校正前後を確認
-        setModalState({
-          isOpen: true,
-          originalText: currentText,
-          correctedText: data.correctedText,
-          fieldName: fieldName
-        });
-      } else {
-        console.error('Error:', data.error);
-        alert('校正に失敗しました: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Fetch error:', error);
-      alert('校正に失敗しました');
-    } finally {
-      setProofreadingLoading(prev => ({ ...prev, [fieldName]: false }));
-    }
-  };
-
-  // モーダル関連のハンドラー
-  const handleConfirmCorrection = () => {
-    setInputs(prev => ({
-      ...prev,
-      [modalState.fieldName]: modalState.correctedText,
-    }));
-    setModalState({ ...modalState, isOpen: false });
-  };
-
-  const handleCancelCorrection = () => {
-    setModalState({ ...modalState, isOpen: false });
-  };
-
-  const handleCloseModal = () => {
-    setModalState({ ...modalState, isOpen: false });
   };
 
   const handleDownload = async () => {
@@ -377,6 +302,18 @@ useEffect(() => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{fontWeight: 'bold'}}>自己PR</label>
               <textarea name="self_pr" value={inputs.self_pr} onChange={handleChange} rows={8} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit' }} />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '5px' }}>
+                <ProofreadingButton
+                  text={inputs.self_pr}
+                  onProofreadComplete={(correctedText) => {
+                    setInputs(prev => ({
+                      ...prev,
+                      self_pr: correctedText
+                    }));
+                  }}
+                  className="btn-sm"
+                />
+              </div>
             </div>
           </div>
 
@@ -410,16 +347,6 @@ useEffect(() => {
           )}
         </div>
       )}
-
-      {/* 校正確認モーダル */}
-      <ProofreadingPopUp
-        isOpen={modalState.isOpen}
-        originalText={modalState.originalText}
-        correctedText={modalState.correctedText}
-        onConfirm={handleConfirmCorrection}
-        onCancel={handleCancelCorrection}
-        onClose={handleCloseModal}
-      />
     </div>
   );
 }
