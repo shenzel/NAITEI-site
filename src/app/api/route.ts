@@ -19,12 +19,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { text } = await request.json();
-    if (!text) { // テキストが空の場合
+    const body = await request.json();
+    
+    // 校正機能
+    if (body.text) {
+      if (!body.text.trim()) {
         return Response.json({ error: 'Text is required' }, { status: 400 });
+      }
+      const correctedText = await generateProofreadText(body.text);
+      return Response.json({ correctedText });
     }
-    const correctedText = await generateProofreadText(text);
-    return Response.json({ correctedText });
+    
+    // 質問生成機能
+    if (body.selfPR) {
+      if (!body.selfPR.trim()) {
+        return Response.json({ error: '自己PRが入力されていません' }, { status: 400 });
+      }
+      const questions = await generateQuestions(body.selfPR);
+      return Response.json({ questions });
+    }
+    
+    return Response.json({ error: 'リクエストパラメータが不正です' }, { status: 400 });
   } catch (error) {
     console.error('API Error:', error);
     // APIエラー
@@ -47,4 +62,30 @@ export async function generateProofreadText(text: string): Promise<string> {
   const correctedText = result.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
   return correctedText.trim(); // 余分な空白を削除して返す
+}
+
+export async function generateQuestions(selfPR: string): Promise<string[]> {
+  const prompt = `以下の自己PRの内容を読んで、面接で聞かれそうな深掘りできる質問を2つ生成してください。
+質問は簡潔に1文で作成し、具体的で回答者の経験や考えを引き出せるものにしてください。
+質問のみを改行区切りで返してください。説明や番号は不要です。
+
+自己PR:
+${selfPR}`;
+
+  // モデル指定
+  const result = await genAI.models.generateContent({
+    model: "gemini-1.5-flash",
+    contents: prompt,
+  });
+
+  // レスポンスからテキストを取得
+  const text = result.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  
+  // 改行で分割して質問の配列を作成
+  const questions = text
+    .split('\n')
+    .map(q => q.trim())
+    .filter(q => q.length > 0 && !q.match(/^\d+\./) && q.includes('？')); // 番号付きを除外し、疑問符があるもののみ
+  
+  return questions;
 }
