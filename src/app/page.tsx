@@ -19,6 +19,7 @@ export default function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('stylish');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [proofreadingLoading, setProofreadingLoading] = useState<{[key: string]: boolean}>({}); // 校正中のロード状態を管理するやつ
 
   useEffect(() => {
     const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
@@ -80,6 +81,55 @@ export default function Home() {
       [name]: value,
     }));
   };
+
+  // じん担当
+  // 校正ボタンの関数
+  const getProofreadButtonStyle = (isLoading: boolean, hasText: boolean) => ({
+    padding: '8px 12px',
+    backgroundColor: isLoading ? '#ccc' : '#4CAF50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: isLoading ? 'not-allowed' : 'pointer',
+    fontSize: '12px',
+    whiteSpace: 'nowrap' as const
+  });
+
+  const handleProofread = async (fieldName: string) => {
+    const currentText = inputs[fieldName as keyof typeof inputs];
+    if (!currentText.trim()) return;
+
+    setProofreadingLoading(prev => ({ ...prev, [fieldName]: true }));
+    
+    try {
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: currentText }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setInputs(prev => ({
+          ...prev,
+          [fieldName]: data.correctedText,
+        }));
+      } else {
+        console.error('Error:', data.error);
+        alert('校正に失敗しました: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      alert('校正に失敗しました');
+    } finally {
+      setProofreadingLoading(prev => ({ ...prev, [fieldName]: false }));
+    }
+  };
+
+  // じん担当ここまで
 
   const handleDownload = async () => {
     const zip = new JSZip();
@@ -176,18 +226,66 @@ export default function Home() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{fontWeight: 'bold'}}>キャッチフレーズ</label>
-              <input type="text" name="catchphrase" value={inputs.catchphrase} onChange={handleChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+              {/* じん担当 */}
+              {/* キャッチフレーズ部分のみサイズが都となるためstyleを調整 */}
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                <input 
+                  type="text" 
+                  name="catchphrase" 
+                  value={inputs.catchphrase} 
+                  onChange={handleChange} 
+                  style={{ flex: 1, padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} 
+                />
+                <button
+                  onClick={() => handleProofread('catchphrase')}
+                  disabled={proofreadingLoading.catchphrase || !inputs.catchphrase.trim()}
+                  style={{
+                    ...getProofreadButtonStyle(proofreadingLoading.catchphrase, inputs.catchphrase.trim().length > 0),
+                    padding: '10px 15px'
+                  }}
+                >
+                  {proofreadingLoading.catchphrase ? '校正中...' : '文章校正'}
+                </button>
+              </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>あなたの長所と短所を教えてください。</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{fontWeight: 'bold'}}>あなたの長所と短所を教えてください。</label>
+                <button
+                  onClick={() => handleProofread('strengthAndWeakness')}
+                  disabled={proofreadingLoading.strengthAndWeakness || !inputs.strengthAndWeakness.trim()}
+                  style={getProofreadButtonStyle(proofreadingLoading.strengthAndWeakness, inputs.strengthAndWeakness.trim().length > 0)}
+                >
+                  {proofreadingLoading.strengthAndWeakness ? '校正中...' : '文章校正'}
+                </button>
+              </div>
               <textarea name="strengthAndWeakness" value={inputs.strengthAndWeakness} onChange={handleChange} rows={5} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>学生時代に最も打ち込んだことは何ですか？</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{fontWeight: 'bold'}}>学生時代に最も打ち込んだことは何ですか？</label>
+                <button
+                  onClick={() => handleProofread('mostDevotedThing')}
+                  disabled={proofreadingLoading.mostDevotedThing || !inputs.mostDevotedThing.trim()}
+                  style={getProofreadButtonStyle(proofreadingLoading.mostDevotedThing, inputs.mostDevotedThing.trim().length > 0)}
+                >
+                  {proofreadingLoading.mostDevotedThing ? '校正中...' : '文章校正'}
+                </button>
+              </div>
               <textarea name="mostDevotedThing" value={inputs.mostDevotedThing} onChange={handleChange} rows={5} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>当社のどのような点に魅力を感じましたか？</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{fontWeight: 'bold'}}>当社のどのような点に魅力を感じましたか？</label>
+                <button
+                  onClick={() => handleProofread('companyAttraction')}
+                  disabled={proofreadingLoading.companyAttraction || !inputs.companyAttraction.trim()}
+                  style={getProofreadButtonStyle(proofreadingLoading.companyAttraction, inputs.companyAttraction.trim().length > 0)}
+                >
+                  {proofreadingLoading.companyAttraction ? '校正中...' : '文章校正'}
+                </button>
+              </div>
+              {/* じん担当ここまで */}
               <textarea name="companyAttraction" value={inputs.companyAttraction} onChange={handleChange} rows={5} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
 
