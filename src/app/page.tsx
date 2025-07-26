@@ -6,6 +6,7 @@ import { templates, TemplateKey } from '../../lib/templates';
 import JSZip from 'jszip';
 import Link from "next/link";
 import ProofreadingButton from '../components/ProofreadingButton';
+import LogoutButton from "@/components/LogoutButton";
 
 export default function Home() {
 
@@ -374,6 +375,7 @@ export default function Home() {
         </div>
       </div>
 
+      <LogoutButton />
       {isPreviewVisible && (
         <div style={{ flex: 1, padding: '20px', backgroundColor: '#e9ecef' }}>
           <h2 style={{ textAlign: 'center', color: '#495057' }}>プレビュー</h2>
