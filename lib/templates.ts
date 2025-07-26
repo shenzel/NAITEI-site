@@ -19,39 +19,110 @@ const generateStylishContent = (data: PortfolioData, imageFileName?: string) => 
 
   // ▼▼▼ CSSのパスを "style.css" に、JSのパスを "script.js" に統一 ▼▼▼
   const html = `<!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
-  <title>${data.yourName}のポートフォリオ</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/8036d0d404.js" crossorigin="anonymous"></script>
+    <script src="static/js/main.js"></script>
+    <title>NAITEI.site</title>
 </head>
 <body>
-  <div class="container">
-    <div class="first-block section-divider">
-      ${imageTag}
-      <div class="profile-text">
-        <div class="profile-row"><div class="profile-label">名前</div><div class="profile-colon">:</div><div class="profile-value">${data.yourName}</div></div>
-        <div class="profile-row"><div class="profile-label">出身地</div><div class="profile-colon">:</div><div class="profile-value">${data.hometown}</div></div>
-        <div class="profile-row"><div class="profile-label">大学</div><div class="profile-colon">:</div><div class="profile-value">${data.university}</div></div>
-        <div class="profile-row"><div class="profile-label">学部/学科</div><div class="profile-colon">:</div><div class="profile-value">${data.faculty}</div></div>
-        <div class="profile-row"><div class="profile-label">将来の夢</div><div class="profile-colon">:</div><div class="profile-value">${data.dream}</div></div>
-      </div>
-    </div>
-    <div class="second-block section-divider">
-      <div class="second-box-wrapper"><h2 class="header">趣味</h2><div class="second-box"><ul>${hobbyList}</ul></div></div>
-      <div class="second-box-wrapper"><h2 class="header">スキル・資格</h2><div class="second-box"><ul>${skillList}</ul></div></div>
-    </div>
-    <div class="third-block section-divider">
-      <h2 class="header">自己PR</h2>
+    <!-- Navigation -->
+    <nav>
+        <div class="container navigation">
+            <img class="logo" src="/static/image/logo.png" alt="logo"> 
+            <div class="language">
+                <img src="/static/image/english-icon.png" alt="English" class="flag">
+                <a href="/">English</a>
+                <i class="fa-solid fa-chevron-up"></i>
+            </div>
+        </div>
+    </nav>
 
-      <div class="text-box"><p>${data.self_pr.replace(/\n/g, '<br>')}</p></div>
-    </div>
-  </div>
-  <script src="script.js"></script>
+    <section class="basic-info">
+        <div class="container">
+
+            <!-- First Block -->
+            <div class="first-block section-divider">
+                ${imageTag}
+                <div class="profile-text">
+                    <div class="profile-row">
+                        <div class="profile-label">名前</div>
+                        <div class="profile-colon">:</div>
+                        <!-- 変数 -->
+                        <div class="profile-value">${data.yourName}</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-label">出身地</div>
+                        <div class="profile-colon">:</div>
+                        <!-- 変数 -->
+                        <div class="profile-value">${data.hometown}</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-label">大学</div>
+                        <div class="profile-colon">:</div>
+                        <!-- 変数 -->
+                        <div class="profile-value">${data.university}</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-label">学部/学科</div>
+                        <div class="profile-colon">:</div>
+                        <!-- 変数 -->
+                        <div class="profile-value">${data.faculty}</div>
+                    </div>
+                    <div class="profile-row">
+                        <div class="profile-label">将来の夢</div>
+                        <div class="profile-colon">:</div>
+                        <!-- 変数 -->
+                        <div class="profile-value">${data.dream}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Block -->
+            <div class="second-block section-divider">
+                <div class="second-box-wrapper">
+                    <h2 class="header">趣味</h2>
+                    <div class="second-box">
+                        <ul>
+                          ${hobbyList}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="second-box-wrapper">
+                    <h2 class="header">スキル・資格</h2>
+                    <div class="second-box">
+                        <ul>
+                          ${skillList}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Third Block -->
+            <div class="third-block section-divider">
+                <h2 class="header">自己PR</h2>
+                <div class="text-box">
+                    <!-- 変数　改行どうすればいいかな？ -->
+                    <p>
+                    ${data.self_pr}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+            <footer>
+                <p>&copy;NAITEI.site 2025 All rights reserved.</p>
+            </footer>
+    </section>
+
 </body>
 </html>`;
 
