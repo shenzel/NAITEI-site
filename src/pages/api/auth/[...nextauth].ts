@@ -1,11 +1,12 @@
 // src/pages/api/auth/[...nextauth].ts
 
-import NextAuth from "next-auth"
+import NextAuth,{User} from "next-auth"
 import GithubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from 'next-auth/providers/credentials'; 
 import { compare } from 'bcrypt'; 
 import { kv } from '@/lib/kv'; 
+import {JWT} from 'next-auth/jwt';
 
 export const authOptions = {
   //認証プロバイダーの設定
@@ -46,6 +47,22 @@ export const authOptions = {
     }),
 
   ], 
+
+  callbacks: {
+    //JWTが作成/更新されたときに呼ばれる
+    jwt({ token, user}: { token: JWT; user?: User }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    session({ session, token}: {session:any, token:JWT}) {
+      if(session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+  },
 };
 
 export default NextAuth(authOptions);
