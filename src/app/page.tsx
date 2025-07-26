@@ -22,24 +22,33 @@ export default function Home() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
-    let previewHtml = html
-      .replace('<link rel="stylesheet" href="style.css">', `<style>${css}</style>`)
-      .replace('<script src="script.js"></script>', `<script>${js}</script>`);
-    
-    if (imageFile && imageUrl) {
-      previewHtml = previewHtml.replace(`src="img/${imageFile.name}"`, `src="${imageUrl}"`);
-    }
+useEffect(() => {
+  const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
 
-    const blob = new Blob([previewHtml], { type: 'text/html' });
-    
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setPreviewUrl(URL.createObjectURL(blob));
+  let previewHtml = html
+    .replace('<link rel="stylesheet" href="style.css">', `<style>${css}</style>`)
+    .replace('<script src="script.js"></script>', `<script>${js}</script>`);
 
-  }, [inputs, selectedTemplate, imageFile, imageUrl]); 
+  // ▼▼▼ ここからが修正部分 ▼▼▼
+  // 現在のサイトのオリジン（http://localhost:3000 など）を取得
+  const origin = window.location.origin;
+
+  // 1. ユーザーがアップロードした画像のパスを、プレビュー用の一時URLに置換
+  if (imageFile && imageUrl) {
+    previewHtml = previewHtml.replace(`src="img/${imageFile.name}"`, `src="${imageUrl}"`);
+  }
+
+  // 2. テンプレート内の静的画像（ロゴなど）のパスを、完全なURLに置換
+  //    "img/..." を "http://localhost:3000/img/..." のように書き換える
+  previewHtml = previewHtml.replace(/src="img\//g, `src="${origin}/img/`);
+  // ▲▲▲ ここまで ▲▲▲
+
+  const blob = new Blob([previewHtml], { type: 'text/html' });
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl);
+  }
+  setPreviewUrl(URL.createObjectURL(blob));
+}, [inputs, selectedTemplate, imageFile, imageUrl]);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -73,16 +82,44 @@ export default function Home() {
     setInputs(prev => ({ ...prev, skill: value.split(',').map(item => item.trim()) }));
   };
 
-  const handleDownload = async () => {
+const handleDownload = async () => {
     const zip = new JSZip();
+    
+    // 1. HTML, CSS, JSを生成してZIPに追加 
     const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
     zip.file('index.html', html);
     zip.file('style.css', css);
     zip.file('script.js', js);
+
+    // 2. imgフォルダを取得または作成
+    const imgFolder = zip.folder('img');
+    if (!imgFolder) return; // 安全のためのチェック
+
+    // 3. ユーザーがアップロードした画像を追加 (変更なし)
     if (imageFile) {
-      const imgFolder = zip.folder('img');
-      if (imgFolder) { imgFolder.file(imageFile.name, imageFile); }
+      imgFolder.file(imageFile.name, imageFile);
     }
+
+    // ▼▼▼ ここからが追加部分 ▼▼▼
+    // 4. publicフォルダにある静的画像を取得して追加
+    const staticImagePaths = ['logo.png', 'english-icon.png']; // ZIPに含めたい画像リスト
+
+    for (const path of staticImagePaths) {
+      try {
+        const response = await fetch(`/img/${path}`); // public/img/から画像を取得
+        if (response.ok) {
+          const blob = await response.blob(); // データをBlob形式に変換
+          imgFolder.file(path, blob); // imgフォルダにファイルを追加
+        } else {
+          console.error(`Failed to fetch static image: ${path}`);
+        }
+      } catch (error) {
+        console.error(`Error fetching ${path}:`, error);
+      }
+    }
+    // ▲▲▲ ここまで ▲▲▲
+
+    // 5. ZIPを生成してダウンロード (変更なし)
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     const url = URL.createObjectURL(zipBlob);
     const a = document.createElement('a');
