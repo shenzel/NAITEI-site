@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from './auth/[...nextauth]';
+import { authOptions } from '@/pages/api/auth/[...nextauth]'; 
 import { kv } from '@/lib/kv';
 
 export default async function handler(
@@ -9,6 +9,8 @@ export default async function handler(
 ) {
   
   const session = await getServerSession(req, res, authOptions);
+  console.log("✅ session:", session); // ← 確認用ログ追加
+
   if (!session?.user?.id) {
     return res.status(401).json({ error: 'ログインしていません' });
   }
