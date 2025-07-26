@@ -292,13 +292,13 @@ useEffect(() => {
     );
   }
 
-  // 画面の描画
+  
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
       <div style={{ flex: 1, padding: '30px', overflowY: 'auto', backgroundColor: '#fdfdfd', color: '#000000' }}>
         <div style={{ maxWidth: isPreviewVisible ? '600px' : '800px', margin: '0 auto', transition: 'max-width 0.3s' }}>
           <h1>ポートフォリオジェネレーター 🚀</h1>
-          
+
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '20px' }}>
             <button onClick={() => setIsPreviewVisible(!isPreviewVisible)} style={{ padding: '8px 16px', cursor: 'pointer' }}>
               {isPreviewVisible ? 'プレビューを隠す' : 'プレビューを表示'}
@@ -319,8 +319,8 @@ useEffect(() => {
               </select>
             </div>
           </div>
-          
-          <hr style={{border: 'none', borderTop: '1px solid #eee', margin: '20px 0'}} />
+
+          <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '20px 0' }} />
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '25px' }}>
             <label style={{fontWeight: 'bold'}}>プロフィール画像</label>
@@ -380,36 +380,37 @@ useEffect(() => {
             </div>
           </div>
 
-          
+
           <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
             <button
-              onClick={handleSave} 
+              onClick={handleSave}
               style={{ flex: 1, padding: '15px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '5px' }}
             >
               💾 内容を保存
             </button>
-          <button
-            onClick={handleDownload}
-            style={{ padding: '15px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', marginTop: '30px', width: '100%' }}
-          >
-            ZIPファイルで一括ダウンロード 📁
-          </button>
+            <button
+              onClick={handleDownload}
+              style={{ padding: '15px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', width: '100%' }}
+            >
+              ZIPファイルで一括ダウンロード 📁
+            </button>
+          </div>
         </div>
       </div>
-      
+
       {isPreviewVisible && (
         <div style={{ flex: 1, padding: '20px', backgroundColor: '#e9ecef' }}>
-           <h2 style={{ textAlign: 'center', color: '#495057' }}>プレビュー</h2>
-           {previewUrl && (
-             <iframe
-                src={previewUrl}
-                title="ポートフォリオプレビュー"
-                style={{ width: '100%', height: 'calc(100% - 50px)', border: '1px solid #ccc', backgroundColor: '#fff', borderRadius: '8px' }}
-             />
-           )}
+          <h2 style={{ textAlign: 'center', color: '#495057' }}>プレビュー</h2>
+          {previewUrl && (
+            <iframe
+              src={previewUrl}
+              title="ポートフォリオプレビュー"
+              style={{ width: '100%', height: 'calc(100% - 50px)', border: '1px solid #ccc', backgroundColor: '#fff', borderRadius: '8px' }}
+            />
+          )}
         </div>
       )}
-      
+
       {/* 校正確認モーダル */}
       <ProofreadingPopUp
         isOpen={modalState.isOpen}
@@ -421,4 +422,7 @@ useEffect(() => {
       />
     </div>
   );
-  }
+}
+
+
+ 
