@@ -5,7 +5,7 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { templates, TemplateKey } from '../../lib/templates';
 import JSZip from 'jszip';
 import Link from "next/link";
-import ProofreadingButton from '../components/ProofreadingButton';
+import ProofreadingPopUp from '../components/ProofreadingPopUp';
 
 export default function Home() {
 
@@ -28,6 +28,31 @@ export default function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('stylish');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [proofreadingLoading, setProofreadingLoading] = useState<{[key: string]: boolean}>({}); // 校正中のロード状態を管理するやつ
+
+  useEffect(()=> {
+    if (status === "authenticated"){
+      const fetchProfile = async () => {
+        const res = await fetch('/api/profile');
+        if (res.ok) {
+          const data = await res.json();
+          //取得したデータでstateを更新
+          setInputs(data.content)
+          setSelectedTemplate(data.templateId);
+          //todo 画像を復元できるようにする
+        }
+      };
+      fetchProfile();
+    }
+  },[status]); 
+  
+  // モーダル関連のState
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    originalText: '',
+    correctedText: '',
+    fieldName: ''
+  });
 
 useEffect(() => {
   const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
@@ -56,6 +81,27 @@ useEffect(() => {
   }
   setPreviewUrl(URL.createObjectURL(blob));
 }, [inputs, selectedTemplate, imageFile, imageUrl]);
+
+
+  // ▼▼▼ ここに handleSave 関数を移動させる ▼▼▼
+  const handleSave = async () => {
+    const dataToSave = {
+      content: inputs,
+      templateId: selectedTemplate,
+    };
+
+    const res = await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataToSave),
+    });
+
+    if (res.ok) {
+      alert('保存しました！');
+    } else {
+      alert('保存に失敗しました。');
+    }
+  };
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -87,6 +133,72 @@ useEffect(() => {
   const handleSkillChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setInputs(prev => ({ ...prev, skill: value.split(',').map(item => item.trim()) }));
+  };
+
+  // 校正ボタンの関数
+  const getProofreadButtonStyle = (isLoading: boolean, hasText: boolean) => ({
+    padding: '8px 12px',
+    backgroundColor: isLoading ? '#ccc' : '#4CAF50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: isLoading ? 'not-allowed' : 'pointer',
+    fontSize: '12px',
+    whiteSpace: 'nowrap' as const
+  });
+
+  const handleProofread = async (fieldName: string) => {
+    const currentText = inputs[fieldName as keyof typeof inputs];
+    if (!currentText.trim()) return;
+
+    setProofreadingLoading(prev => ({ ...prev, [fieldName]: true }));
+    
+    try {
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: currentText }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // モーダルを表示して校正前後を確認
+        setModalState({
+          isOpen: true,
+          originalText: currentText,
+          correctedText: data.correctedText,
+          fieldName: fieldName
+        });
+      } else {
+        console.error('Error:', data.error);
+        alert('校正に失敗しました: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      alert('校正に失敗しました');
+    } finally {
+      setProofreadingLoading(prev => ({ ...prev, [fieldName]: false }));
+    }
+  };
+
+  // モーダル関連のハンドラー
+  const handleConfirmCorrection = () => {
+    setInputs(prev => ({
+      ...prev,
+      [modalState.fieldName]: modalState.correctedText,
+    }));
+    setModalState({ ...modalState, isOpen: false });
+  };
+
+  const handleCancelCorrection = () => {
+    setModalState({ ...modalState, isOpen: false });
+  };
+
+  const handleCloseModal = () => {
+    setModalState({ ...modalState, isOpen: false });
   };
 
   const handleDownload = async () => {
@@ -147,6 +259,9 @@ useEffect(() => {
     );
   }
 
+ 
+
+
   // ログインしていない場合の表示
   if (!session) {
     return (
@@ -177,13 +292,13 @@ useEffect(() => {
     );
   }
 
-  // 画面の描画
+  
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
       <div style={{ flex: 1, padding: '30px', overflowY: 'auto', backgroundColor: '#fdfdfd', color: '#000000' }}>
         <div style={{ maxWidth: isPreviewVisible ? '600px' : '800px', margin: '0 auto', transition: 'max-width 0.3s' }}>
           <h1>ポートフォリオジェネレーター 🚀</h1>
-          
+
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '20px' }}>
             <button onClick={() => setIsPreviewVisible(!isPreviewVisible)} style={{ padding: '8px 16px', cursor: 'pointer' }}>
               {isPreviewVisible ? 'プレビューを隠す' : 'プレビューを表示'}
@@ -204,8 +319,8 @@ useEffect(() => {
               </select>
             </div>
           </div>
-          
-          <hr style={{border: 'none', borderTop: '1px solid #eee', margin: '20px 0'}} />
+
+          <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '20px 0' }} />
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '25px' }}>
             <label style={{fontWeight: 'bold'}}>プロフィール画像</label>
@@ -262,42 +377,52 @@ useEffect(() => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{fontWeight: 'bold'}}>自己PR</label>
               <textarea name="self_pr" value={inputs.self_pr} onChange={handleChange} rows={8} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit' }} />
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '5px' }}>
-                <ProofreadingButton
-                  text={inputs.self_pr}
-                  onProofreadComplete={(correctedText) => {
-                    setInputs(prev => ({
-                      ...prev,
-                      self_pr: correctedText
-                    }));
-                  }}
-                  className="btn-sm"
-                />
-              </div>
             </div>
           </div>
 
-          <button
-            onClick={handleDownload}
-            style={{ padding: '15px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', marginTop: '30px', width: '100%' }}
-          >
-            ZIPファイルで一括ダウンロード 📁
-          </button>
+
+          <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
+            <button
+              onClick={handleSave}
+              style={{ flex: 1, padding: '15px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '5px' }}
+            >
+              💾 内容を保存
+            </button>
+            <button
+              onClick={handleDownload}
+              style={{ padding: '15px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', width: '100%' }}
+            >
+              ZIPファイルで一括ダウンロード 📁
+            </button>
+          </div>
         </div>
       </div>
-      
+
       {isPreviewVisible && (
         <div style={{ flex: 1, padding: '20px', backgroundColor: '#e9ecef' }}>
-           <h2 style={{ textAlign: 'center', color: '#495057' }}>プレビュー</h2>
-           {previewUrl && (
-             <iframe
-                src={previewUrl}
-                title="ポートフォリオプレビュー"
-                style={{ width: '100%', height: 'calc(100% - 50px)', border: '1px solid #ccc', backgroundColor: '#fff', borderRadius: '8px' }}
-             />
-           )}
+          <h2 style={{ textAlign: 'center', color: '#495057' }}>プレビュー</h2>
+          {previewUrl && (
+            <iframe
+              src={previewUrl}
+              title="ポートフォリオプレビュー"
+              style={{ width: '100%', height: 'calc(100% - 50px)', border: '1px solid #ccc', backgroundColor: '#fff', borderRadius: '8px' }}
+            />
+          )}
         </div>
       )}
+
+      {/* 校正確認モーダル */}
+      <ProofreadingPopUp
+        isOpen={modalState.isOpen}
+        originalText={modalState.originalText}
+        correctedText={modalState.correctedText}
+        onConfirm={handleConfirmCorrection}
+        onCancel={handleCancelCorrection}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
+
+
+ 
