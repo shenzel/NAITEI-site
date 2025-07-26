@@ -142,6 +142,7 @@ body {
     font-weight: 400;
     font-family: "Noto Sans JP", sans-serif;
     font-weight: 400;
+    background-color: #0B132B;
 }
 .container {
     max-width: 1200px;
@@ -155,6 +156,7 @@ body {
     font-size: 3.5rem;
     font-weight: 500;
     text-align: center;
+    padding-bottom: 20px;
 }
 
 /* Navigation */
@@ -201,7 +203,7 @@ nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 40px;
+    gap: 100px;
 }
 .profile-image {
     width: 30%;
@@ -246,7 +248,6 @@ nav {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
     width: 100%;
 }
 .second-box {
@@ -292,6 +293,105 @@ footer {
     padding: 20px 0;
     font-size: 2.3rem;
     font-weight: 3;
+}
+    @media (max-width: 768px) {
+    /* General */
+    .section-divider {
+        margin: 30px 0;
+    }
+    .header {
+        font-size: 2.5rem;
+    }
+    
+    /* Navigation */
+    .navigation {
+        padding: 5px
+    }
+    .logo {
+        width: 130px;
+    }
+    .language {
+        padding: 8px 15px;
+        font-size: 1.2rem;
+    }
+    .language a {
+        font-size: 1.2rem;
+    }
+    .flag {
+        width: 20px;
+    }
+
+    /* First Block */
+    .basic-info {
+        padding-top: 0;
+        margin-top: -10px;
+    }
+    .first-block {
+        flex-direction: column;
+        gap: 0;
+    }
+    .profile-image {
+        width: 100%;
+        height: 300px;
+        margin-bottom: 20px;
+        object-fit: cover;
+
+    }
+    .profile-text {
+        width: 100%;
+        text-align: center;
+        padding: 10px 0;
+        font-size: 1.8rem;
+        gap: 10px;
+    }
+    .profile-row {
+        margin-bottom: 1.2rem;
+        grid-template-columns: 5em 1em auto;
+    }
+
+    /* Second Block */
+    .second-block {
+        flex-direction: column;
+        align-items: center;
+    }
+    .second-box {
+        font-size: 1.4rem;
+        padding: 20px;
+    }
+    .second-box ul {
+        gap: 15px;
+    }
+    
+    /* Third Box */
+    .text-box {
+        font-size: 1.6rem;
+        padding: 20px;
+    }
+
+    /* Footer */
+    footer {
+        font-size: 1.6rem;
+        padding: 15px 0;
+    }
+}
+
+@media (max-width: 350px) {
+    /* First Block */
+    .profile-text {
+        font-size: 1.4rem;
+    }
+
+    /* Second Block */
+    .second-box {
+        font-size: 1.2rem;
+        padding: 15px;
+    }
+
+    /* Third Block */
+    .text-box {
+        font-size: 1.2rem;
+        padding: 15px;
+    }
 }`;
 
   const js = `document.addEventListener('DOMContentLoaded', () => {
