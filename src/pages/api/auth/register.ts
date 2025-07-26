@@ -7,6 +7,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  
+  // --- ▼ デバッグ用のコードを追加 ▼ ---
+  console.log('--- Environment Variables Check ---');
+  console.log('KV_REST_API_URL:', process.env.KV_REST_API_URL);
+  // トークン自体は長すぎるので、存在するかどうか(true/false)だけ確認
+  console.log('KV_REST_API_TOKEN is set:', !!process.env.KV_REST_API_TOKEN);
+  console.log('---------------------------------');
+  // --- ▲ デバッグ用のコードはここまで ▲ ---
+  
   if (req.method !== 'POST') {
     return res.status(405).end();
   }
