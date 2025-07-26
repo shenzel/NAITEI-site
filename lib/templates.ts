@@ -7,6 +7,11 @@ interface PortfolioData {
   hobby: string[];
   skill: string[];
   self_pr: string;
+  questions: Array<{
+    id: string;
+    question: string;
+    answer: string;
+  }>;
 }
 
 
@@ -16,6 +21,16 @@ const getHtml = (data: PortfolioData, imageFileName?: string) => {
   // ▼▼▼ hobbyとskillのリストを動的に生成 ▼▼▼
   const hobbyList = data.hobby.map(item => `<li>${item}</li>`).join('');
   const skillList = data.skill.map(item => `<li>${item}</li>`).join('');
+
+  // 質問を動的に生成
+  const questionsHtml = data.questions.map((q, index) => `
+            <!-- Question ${index + 1} Block -->
+            <div class="question-block section-divider">
+                <h2 class="header">${q.question}</h2>
+                <div class="text-box">
+                    <p>${q.answer}</p>
+                </div>
+            </div>`).join('');
 
   // ▼▼▼ CSSのパスを "style.css" に、JSのパスを "script.js" に統一 ▼▼▼
   const html = `<!DOCTYPE html>
@@ -115,6 +130,8 @@ const getHtml = (data: PortfolioData, imageFileName?: string) => {
                     </p>
                 </div>
             </div>
+
+            ${questionsHtml}
         </div>
 
         <!-- Footer -->
@@ -136,6 +153,7 @@ const generatePatern = (data: PortfolioData, imageFileName?: string) => {
   const js = `document.addEventListener('DOMContentLoaded', () => {
   console.log('ポートフォリオサイトへようこそ！');
 });`;
+
   return { html, js };
 };
 

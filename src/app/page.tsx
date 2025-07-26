@@ -6,6 +6,7 @@ import { templates, TemplateKey } from '../../lib/templates';
 import JSZip from 'jszip';
 import Link from "next/link";
 import ProofreadingButton from '../components/ProofreadingButton';
+import QuestionsManager, { Question } from '../components/QuestionsManager';
 
 export default function Home() {
 
@@ -20,7 +21,14 @@ export default function Home() {
     dream: 'データサイエンティスト',
     hobby: ['競技プログラミング', '釣り'],
     skill: ['Python', 'HTML', 'CSS', 'JavaScript'],
-    self_pr: '投資プログラムを開発し、コンテストで入賞したことです。\n開発期間は6か月、Pythonを使って個人で開発しました。'
+    self_pr: '投資プログラムを開発し、コンテストで入賞したことです。\n開発期間は6か月、Pythonを使って個人で開発しました。',
+    questions: [
+      {
+        id: '1',
+        question: 'チームワークで重視することは何ですか？',
+        answer: '相互尊重とオープンなコミュニケーションを重視します。チームメンバーそれぞれの意見を聞き、建設的な議論を通じて最適な解決策を見つけることが大切だと考えています。'
+      },
+    ] as Question[]
   });
   
   // 読み込んだCSSの中身を保持するState
@@ -39,8 +47,39 @@ export default function Home() {
         const res = await fetch('/api/profile');
         if (res.ok) {
           const data = await res.json();
-          // 取得したデータでstateを更新
-          setInputs(data.content);
+          //取得したデータでstateを更新
+          const content = data.content;
+          
+          // 古い形式（string）から新しい形式（Question[]）への変換
+          if (typeof content.questions === 'string') {
+            // 古い形式の文字列を解析して配列に変換
+            const questionsText = content.questions;
+            const questions: Question[] = [];
+            
+            if (questionsText && questionsText.trim()) {
+              // Q1/A1, Q2/A2 パターンで分割
+              const lines = questionsText.split('\n\n');
+              let currentQuestion: Partial<Question> = {};
+              
+              lines.forEach((line: string, index: number) => {
+                if (line.startsWith('Q')) {
+                  currentQuestion = {
+                    id: (index + 1).toString(),
+                    question: line.replace(/^Q\d+\.\s*/, ''),
+                    answer: ''
+                  };
+                } else if (line.startsWith('A') && currentQuestion.id) {
+                  currentQuestion.answer = line.replace(/^A\d+\.\s*/, '');
+                  questions.push(currentQuestion as Question);
+                  currentQuestion = {};
+                }
+              });
+            }
+            
+            content.questions = questions;
+          }
+          
+          setInputs(content);
           setSelectedTemplate(data.templateId);
         } else if (res.status === 404) {
           // データがまだ保存されていない場合は何もしない
@@ -354,6 +393,16 @@ export default function Home() {
                 />
               </div>
             </div>
+            <QuestionsManager
+              questions={inputs.questions}
+              onChange={(questions) => {
+                setInputs(prev => ({
+                  ...prev,
+                  questions
+                }));
+              }}
+              selfPR={inputs.self_pr}
+            />
           </div>
 
 
