@@ -5,6 +5,7 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { templates, TemplateKey } from '../../lib/templates';
 import JSZip from 'jszip';
 import Link from "next/link";
+import ProofreadingPopUp from '../components/ProofreadingPopUp';
 
 export default function Home() {
 
@@ -25,6 +26,14 @@ export default function Home() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [proofreadingLoading, setProofreadingLoading] = useState<{[key: string]: boolean}>({}); // 校正中のロード状態を管理するやつ
+  
+  // モーダル関連のState
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    originalText: '',
+    correctedText: '',
+    fieldName: ''
+  });
 
   useEffect(() => {
     const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
@@ -118,10 +127,13 @@ export default function Home() {
       const data = await response.json();
       
       if (response.ok) {
-        setInputs(prev => ({
-          ...prev,
-          [fieldName]: data.correctedText,
-        }));
+        // モーダルを表示して校正前後を確認
+        setModalState({
+          isOpen: true,
+          originalText: currentText,
+          correctedText: data.correctedText,
+          fieldName: fieldName
+        });
       } else {
         console.error('Error:', data.error);
         alert('校正に失敗しました: ' + data.error);
@@ -132,6 +144,23 @@ export default function Home() {
     } finally {
       setProofreadingLoading(prev => ({ ...prev, [fieldName]: false }));
     }
+  };
+
+  // モーダル関連のハンドラー
+  const handleConfirmCorrection = () => {
+    setInputs(prev => ({
+      ...prev,
+      [modalState.fieldName]: modalState.correctedText,
+    }));
+    setModalState({ ...modalState, isOpen: false });
+  };
+
+  const handleCancelCorrection = () => {
+    setModalState({ ...modalState, isOpen: false });
+  };
+
+  const handleCloseModal = () => {
+    setModalState({ ...modalState, isOpen: false });
   };
 
   // じん担当ここまで
@@ -355,6 +384,16 @@ export default function Home() {
                           )}
         </div>
       )}
+      
+      {/* 校正確認モーダル */}
+      <ProofreadingPopUp
+        isOpen={modalState.isOpen}
+        originalText={modalState.originalText}
+        correctedText={modalState.correctedText}
+        onConfirm={handleConfirmCorrection}
+        onCancel={handleCancelCorrection}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
