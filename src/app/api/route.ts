@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function generateProofreadText(text: string): Promise<string> {
-  const prompt = `以下の文章を校正してください。誤字脱字、文法の間違い、より読みやすい文章にしてください。大きな意味の変更はしないでください。校正後の文章のみを返してください。説明は不要です。\n\n文章:\n${text}`;
+  const prompt = `以下の文章を校正してください。誤字脱字、文法の間違いを修正してください。大きな意味の変更や大幅な文字の削減はしないでください。校正後の文章のみを返してください。説明は不要です。\n\n文章:\n${text}`;
 
   // モデル指定
   const result = await genAI.models.generateContent({
