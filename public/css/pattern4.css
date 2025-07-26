@@ -13,7 +13,7 @@ body {
     line-height: 1.4;
     font-weight: 400;
     font-family: "Noto Sans JP", sans-serif;
-    background-color: white; /*変更*/
+    background-color: #F4F0BB; /*変更*/
 }
 .container {
     max-width: 1200px;
@@ -32,7 +32,7 @@ body {
 
 /* Navigation */
 nav {
-    background-color: #F28F3B; /*変更*/
+    background-color: #DA2C38; /*変更*/
 }
 .navigation {
     display: flex;
@@ -48,14 +48,14 @@ nav {
     display: flex;
     align-items: center;
     gap: 10px;
-    background-color: #C8553D; /*変更*/
+    background-color: #87C38F; /*変更*/
     border-radius: 50px;
     padding: 10px 20px;
     font-size: 1.6rem;
     font-weight: 500;
 }
 .language a {
-    color: white; /*変更*/
+    color: black; /*変更*/
     text-decoration: none;
     font-size: 2.0rem;
 }
@@ -66,7 +66,7 @@ nav {
 
 /* First Block */
 .basic-info {
-    background-color: white; /*変更*/
+    background-color: #F4F0BB; /*変更*/
     padding-top: 40px;
     color: black; /*変更*/
 }
@@ -81,8 +81,8 @@ nav {
     border-radius: 30px;;
 }
 .profile-text {
-    background-color: #FFD5C2; /*変更*/
-    box-shadow: 4px 6px 10px #D5D3D3; /*追加*/
+    background-color: #226F54; /*変更*/
+    color: white; /*変更*/
     padding: 30px;
     border-radius: 30px;
     font-size: 2.8rem;
@@ -123,8 +123,7 @@ nav {
     width: 100%;
 }
 .second-box {
-    background-color: #FFD5C2; /*変更*/
-    box-shadow: 4px 6px 10px #D5D3D3; /*追加*/
+    background-color: #226F54; /*変更*/
     padding: 40px;
     border-radius: 30px;
     font-size: 2.2rem;
@@ -144,13 +143,13 @@ nav {
     justify-content: center;
 }
 .second-box li {
-    background-color: #C2ECFF; /*変更*/
-    border-radius: 20px;
+    background-color: #87C38F; /*変更*/
+    border-radius: 20px;    
     padding: 5px 20px;
 }
 .text-box {
-    background-color: #FFD5C2; /*変更*/
-    box-shadow: 4px 6px 10px #D5D3D3; /*追加*/
+    background-color: #226F54; /*変更*/
+    color: white; /*変更*/
     padding: 50px;
     border-radius: 30px;
     font-size: 2.2rem;
@@ -161,7 +160,7 @@ nav {
 
 /* Footer */
 footer {
-    background-color: #C8553D; /*変更*/
+    background-color: #43291F; /*変更*/
     color: white; /*変更*/
     text-align: center;
     padding: 20px 0;
@@ -176,7 +175,7 @@ footer {
     .header {
         font-size: 2.5rem;
     }
-
+    
     /* Navigation */
     .navigation {
         padding: 5px
@@ -235,8 +234,8 @@ footer {
     .second-box ul {
         gap: 15px;
     }
-
-    /* Third Block */
+    
+    /* Third Box */
     .text-box {
         font-size: 1.6rem;
         padding: 20px;

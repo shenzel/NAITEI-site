@@ -142,12 +142,12 @@ const generatePatern = (data: PortfolioData, imageFileName?: string) => {
 
 // --- エクスポート部分 ---
 export const templates = {
-  stylish: {
-    name: '色1 ✨',
+  first: {
+    name: '色1 📄',
     generate: generatePatern,
     cssPath: '/css/pattern1.css'
   },
-  simple: {
+  second: {
     name: '色2 📄',
     generate: generatePatern,
     cssPath: '/css/pattern2.css'
@@ -156,6 +156,16 @@ export const templates = {
   name: '色3 📄',
   generate: generatePatern,
   cssPath: '/css/pattern3.css'
+  },
+  forth: {
+    name: '色4 📄',
+    generate: generatePatern,
+    cssPath: '/css/pattern4.css'
+  },
+  fifth: {
+    name: '色5 📄',
+    generate: generatePatern,
+    cssPath: '/css/pattern5.css'
   },
 };
 
