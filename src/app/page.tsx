@@ -23,55 +23,76 @@ export default function Home() {
     self_pr: '投資プログラムを開発し、コンテストで入賞したことです。\n開発期間は6か月、Pythonを使って個人で開発しました。'
   });
   
+  // 読み込んだCSSの中身を保持するState
+  const [cssContents, setCssContents] = useState<Record<string, string>>({});
+  
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isPreviewVisible, setIsPreviewVisible] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('stylish');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  useEffect(()=> {
-    if (status === "authenticated"){
+  useEffect(() => {
+    if (status === "authenticated") {
       const fetchProfile = async () => {
         const res = await fetch('/api/profile');
         if (res.ok) {
           const data = await res.json();
-          //取得したデータでstateを更新
-          setInputs(data.content)
+          // 取得したデータでstateを更新
+          setInputs(data.content);
           setSelectedTemplate(data.templateId);
-          //todo 画像を復元できるようにする
+          // TODO: 画像を復元できるようにする
         }
       };
       fetchProfile();
     }
-  },[status]); 
+  }, [status]); 
 
-useEffect(() => {
-  const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
 
-  let previewHtml = html
-    .replace('<link rel="stylesheet" href="style.css">', `<style>${css}</style>`)
-    .replace('<script src="script.js"></script>', `<script>${js}</script>`);
+  useEffect(() => {
+    const fetchAllCss = async () => {
+      const allCss: Record<string, string> = {};
+      for (const key in templates) {
+        const path = templates[key as TemplateKey].cssPath;
+        try {
+          const response = await fetch(path);
+          if (response.ok) {
+            allCss[key] = await response.text();
+          }
+        } catch (error) {
+          console.error(`Failed to fetch css for ${key}:`, error);
+        }
+      }
+      setCssContents(allCss);
+    };
+    fetchAllCss();
+  }, []); // このuseEffectは最初に1回だけ実行する
 
-  // ▼▼▼ ここからが修正部分 ▼▼▼
-  // 現在のサイトのオリジン（http://localhost:3000 など）を取得
-  const origin = window.location.origin;
+  // プレビュー更新用のuseEffect
+  useEffect(() => {
+    // 選択されているテンプレートのCSSをStateから取得
+    const css = cssContents[selectedTemplate] || '';
 
-  // 1. ユーザーがアップロードした画像のパスを、プレビュー用の一時URLに置換
-  if (imageFile && imageUrl) {
-    previewHtml = previewHtml.replace(`src="img/${imageFile.name}"`, `src="${imageUrl}"`);
-  }
+    // CSSがまだ読み込めていない場合は何もしない
+    if (!css) return;
 
-  // 2. テンプレート内の静的画像（ロゴなど）のパスを、完全なURLに置換
-  //    "img/..." を "http://localhost:3000/img/..." のように書き換える
-  previewHtml = previewHtml.replace(/src="img\//g, `src="${origin}/img/`);
-  // ▲▲▲ ここまで ▲▲▲
+    const { html, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
+    let previewHtml = html
+      .replace('<link rel="stylesheet" href="style.css">', `<style>${css}</style>`)
+      .replace('<script src="script.js"></script>', `<script>${js}</script>`);
+    
+    // 画像パスの置換処理
+    const origin = window.location.origin;
+    if (imageFile && imageUrl) {
+      previewHtml = previewHtml.replace(`src="img/${imageFile.name}"`, `src="${imageUrl}"`);
+    }
+    previewHtml = previewHtml.replace(/src="img\//g, `src="${origin}/img/`);
 
-  const blob = new Blob([previewHtml], { type: 'text/html' });
-  if (previewUrl) {
-    URL.revokeObjectURL(previewUrl);
-  }
-  setPreviewUrl(URL.createObjectURL(blob));
-}, [inputs, selectedTemplate, imageFile, imageUrl]);
+    const blob = new Blob([previewHtml], { type: 'text/html' });
+    if (previewUrl) { URL.revokeObjectURL(previewUrl); }
+    setPreviewUrl(URL.createObjectURL(blob));
+
+  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents]);
 
 
   // ▼▼▼ ここに handleSave 関数を移動させる ▼▼▼
@@ -128,42 +149,41 @@ useEffect(() => {
 
   const handleDownload = async () => {
     const zip = new JSZip();
-    
-    // 1. HTML, CSS, JSを生成してZIPに追加 
-    const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
+    const css = cssContents[selectedTemplate] || '';
+
+    if (!css) {
+      alert('CSSがまだ読み込めていません。少し待ってから再度お試しください。');
+      return;
+    }
+
+    const { html, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
     zip.file('index.html', html);
     zip.file('style.css', css);
     zip.file('script.js', js);
-
-    // 2. imgフォルダを取得または作成
-    const imgFolder = zip.folder('img');
-    if (!imgFolder) return; // 安全のためのチェック
-
-    // 3. ユーザーがアップロードした画像を追加 (変更なし)
+    
+    // ユーザーがアップロードした画像を追加
     if (imageFile) {
-      imgFolder.file(imageFile.name, imageFile);
+      const imgFolder = zip.folder('img');
+      if (imgFolder) { imgFolder.file(imageFile.name, imageFile); }
     }
 
-    // ▼▼▼ ここからが追加部分 ▼▼▼
-    // 4. publicフォルダにある静的画像を取得して追加
-    const staticImagePaths = ['logo.png', 'english-icon.png']; // ZIPに含めたい画像リスト
-
-    for (const path of staticImagePaths) {
-      try {
-        const response = await fetch(`/img/${path}`); // public/img/から画像を取得
-        if (response.ok) {
-          const blob = await response.blob(); // データをBlob形式に変換
-          imgFolder.file(path, blob); // imgフォルダにファイルを追加
-        } else {
-          console.error(`Failed to fetch static image: ${path}`);
+    // 静的画像を追加
+    const staticImagePaths = ['logo.png', 'english-icon.png']; 
+    const imgFolder = zip.folder('img');
+    if(imgFolder){
+      for (const path of staticImagePaths) {
+        try {
+          const response = await fetch(`/img/${path}`);
+          if (response.ok) {
+            const blob = await response.blob();
+            imgFolder.file(path, blob);
+          }
+        } catch (error) {
+          console.error(`Error fetching static image ${path}:`, error);
         }
-      } catch (error) {
-        console.error(`Error fetching ${path}:`, error);
       }
     }
-    // ▲▲▲ ここまで ▲▲▲
 
-    // 5. ZIPを生成してダウンロード (変更なし)
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     const url = URL.createObjectURL(zipBlob);
     const a = document.createElement('a');
