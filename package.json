@@ -9,13 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/genai": "^1.11.0",
+    "@google/generative-ai": "^0.24.1",
+    "@vercel/kv": "^3.0.0",
+    "bcrypt": "^6.0.0",
     "jszip": "^3.10.1",
     "next": "15.4.2",
+    "next-auth": "^4.24.11",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/bcrypt": "^6.0.0",
     "@types/jszip": "^3.4.0",
     "@types/node": "^20",
     "@types/react": "^19",

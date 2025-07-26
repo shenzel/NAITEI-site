@@ -1,10 +1,17 @@
 "use client";
+import {useSession, signIn, signOut} from "next-auth/react"
 
 import { useState, useEffect, ChangeEvent } from 'react';
 import { templates, TemplateKey } from '../../lib/templates';
 import JSZip from 'jszip';
+import Link from "next/link";
+import ProofreadingPopUp from '../components/ProofreadingPopUp';
 
 export default function Home() {
+
+  const { data: session, status} = useSession()
+
+  // ユーザーの入力値を管理するState
   const [inputs, setInputs] = useState({
     yourName: '山田 太郎',
     hometown: '東京都',
@@ -21,6 +28,15 @@ export default function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('stylish');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [proofreadingLoading, setProofreadingLoading] = useState<{[key: string]: boolean}>({}); // 校正中のロード状態を管理するやつ
+  
+  // モーダル関連のState
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    originalText: '',
+    correctedText: '',
+    fieldName: ''
+  });
 
 useEffect(() => {
   const { html, css, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
@@ -82,7 +98,73 @@ useEffect(() => {
     setInputs(prev => ({ ...prev, skill: value.split(',').map(item => item.trim()) }));
   };
 
-const handleDownload = async () => {
+  // 校正ボタンの関数
+  const getProofreadButtonStyle = (isLoading: boolean, hasText: boolean) => ({
+    padding: '8px 12px',
+    backgroundColor: isLoading ? '#ccc' : '#4CAF50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: isLoading ? 'not-allowed' : 'pointer',
+    fontSize: '12px',
+    whiteSpace: 'nowrap' as const
+  });
+
+  const handleProofread = async (fieldName: string) => {
+    const currentText = inputs[fieldName as keyof typeof inputs];
+    if (!currentText.trim()) return;
+
+    setProofreadingLoading(prev => ({ ...prev, [fieldName]: true }));
+    
+    try {
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: currentText }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // モーダルを表示して校正前後を確認
+        setModalState({
+          isOpen: true,
+          originalText: currentText,
+          correctedText: data.correctedText,
+          fieldName: fieldName
+        });
+      } else {
+        console.error('Error:', data.error);
+        alert('校正に失敗しました: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      alert('校正に失敗しました');
+    } finally {
+      setProofreadingLoading(prev => ({ ...prev, [fieldName]: false }));
+    }
+  };
+
+  // モーダル関連のハンドラー
+  const handleConfirmCorrection = () => {
+    setInputs(prev => ({
+      ...prev,
+      [modalState.fieldName]: modalState.correctedText,
+    }));
+    setModalState({ ...modalState, isOpen: false });
+  };
+
+  const handleCancelCorrection = () => {
+    setModalState({ ...modalState, isOpen: false });
+  };
+
+  const handleCloseModal = () => {
+    setModalState({ ...modalState, isOpen: false });
+  };
+
+  const handleDownload = async () => {
     const zip = new JSZip();
     
     // 1. HTML, CSS, JSを生成してZIPに追加 
@@ -131,6 +213,46 @@ const handleDownload = async () => {
     URL.revokeObjectURL(url);
   };
 
+
+    if (status === "loading") {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        Loading...
+      </div>
+    );
+  }
+
+  // ログインしていない場合の表示
+  if (!session) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <p>このアプリを利用するにはログインが必要です。</p>
+        <button onClick={() => signIn("github")} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+          Sign in with GitHub
+        </button>
+
+        <button onClick={() => signIn("google")} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+        Sign in with Google
+      </button>
+      <hr />
+
+      <h3>Emailとパスワードでログイン</h3>
+      <form onSubmit={async (e) => {
+        e.preventDefault();
+        const email = e.currentTarget.email.value;
+        const password = e.currentTarget.password.value;
+        await signIn('credentials', { email, password, redirect: false });
+      }}>
+        <input name="email" type="email" placeholder="Email" />
+        <input name="password" type="password" placeholder="Password" />
+        <button type="submit">Sign in</button>
+      </form>
+       <p style={{marginTop: '20px'}}><Link href="/register">アカウントをお持ちでないですか？ 新規登録</Link></p>
+      </div>
+    );
+  }
+
+  // 画面の描画
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
       <div style={{ flex: 1, padding: '30px', overflowY: 'auto', backgroundColor: '#fdfdfd', color: '#000000' }}>
@@ -239,6 +361,16 @@ const handleDownload = async () => {
            )}
         </div>
       )}
+      
+      {/* 校正確認モーダル */}
+      <ProofreadingPopUp
+        isOpen={modalState.isOpen}
+        originalText={modalState.originalText}
+        correctedText={modalState.correctedText}
+        onConfirm={handleConfirmCorrection}
+        onCancel={handleCancelCorrection}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
