@@ -7,12 +7,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // ログインしているユーザーの情報を取得
+  
   const session = await getServerSession(req, res, authOptions);
   if (!session?.user?.id) {
     return res.status(401).json({ error: 'ログインしていません' });
   }
-  // ユーザーごとに一意なキーを生成
+  
   const userId = session.user.id;
   const userKey = `profile:${userId}`;
 
