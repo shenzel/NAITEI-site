@@ -29,6 +29,46 @@ const ProofreadingButton: React.FC<ProofreadingButtonProps> = ({
   const [correctedText, setCorrectedText] = useState('');
   // 元のテキストを保存するstate
   const [originalText, setOriginalText] = useState('');
+  // エラー状態を管理するstate
+  const [error, setError] = useState<string | null>(null);
+
+  // 校正APIを呼び出す非同期関数（10秒タイムアウト付き）
+  const callProofreadingAPI = async (textToProofread: string): Promise<string> => {
+    // 10秒タイムアウトの設定
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 10000); // 10秒
+
+    try {
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: textToProofread }),
+        signal: controller.signal, // タイムアウト用のシグナル
+      });
+
+      // タイムアウトをクリア
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.correctedText;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('校正処理がタイムアウトしました（10秒）。しばらく待ってから再試行してください。');
+      }
+      throw error;
+    }
+  };
 
   // ボタンクリック時の処理を行う非同期関数
   const handleButtonClick = async () => {
@@ -38,34 +78,35 @@ const ProofreadingButton: React.FC<ProofreadingButtonProps> = ({
       return;
     }
 
+    // エラー状態をリセット
+    setError(null);
     // ローディング状態を開始し、元のテキストを保存
     setIsLoading(true);
     setOriginalText(text);
 
     try {
-      // 校正APIに POST リクエストを送信
-      const response = await fetch('/api', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text }),
-      });
-
-      // レスポンスが正常でない場合はエラーをスロー
-      if (!response.ok) {
-        throw new Error('校正に失敗しました');
-      }
-
-      // レスポンスからJSONデータを取得
-      const data = await response.json();
-      // 校正済みテキストをstateに保存し、ポップアップを表示
-      setCorrectedText(data.correctedText);
+      console.log('校正API呼び出し開始（10秒タイムアウト）');
+      
+      // 校正APIを呼び出し（10秒タイムアウト）
+      const result = await callProofreadingAPI(text);
+      
+      // 成功した場合
+      setCorrectedText(result);
       setIsPopupOpen(true);
+      console.log('校正処理完了');
+      
     } catch (error) {
-      // エラーが発生した場合はコンソールログとアラートで通知
       console.error('校正エラー:', error);
-      alert('校正中にエラーが発生しました。もう一度お試しください。');
+      
+      const errorMessage = error instanceof Error ? error.message : '不明なエラーが発生しました';
+      setError(`校正に失敗しました: ${errorMessage}`);
+      
+      // エラーの種類に応じてメッセージを変更
+      if (errorMessage.includes('タイムアウト')) {
+        alert('校正処理がタイムアウトしました（10秒）。');
+      } else {
+        alert(`校正中にエラーが発生しました: ${errorMessage}`);
+      }
     } finally {
       // 処理完了後、必ずローディング状態を解除
       setIsLoading(false);
@@ -107,7 +148,7 @@ const ProofreadingButton: React.FC<ProofreadingButtonProps> = ({
         {isLoading ? (
           <>
             <div className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
-            校正中...
+            校正中... (最大10秒)
           </>
         ) : (
           <>
