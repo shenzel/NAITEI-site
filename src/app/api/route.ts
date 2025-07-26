@@ -11,6 +11,14 @@ const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 export async function POST(request: NextRequest) {
   try {
+    // APIキーの存在確認
+    if (!process.env.GEMINI_API_KEY) {
+      return Response.json(
+        { error: 'API key is not configured' },
+        { status: 500 }
+      );
+    }
+
     const { text } = await request.json();
     if (!text) { // テキストが空の場合
         return Response.json({ error: 'Text is required' }, { status: 400 });
