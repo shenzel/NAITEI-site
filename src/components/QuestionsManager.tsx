@@ -172,15 +172,8 @@ const QuestionsManager: React.FC<QuestionsManagerProps> = ({ questions, onChange
 
               {/* 質問入力フィールド */}
               <div className="mb-3">
-                <label className="form-label fw-bold">質問内容</label>
-                <textarea
-                  value={question.question}
-                  onChange={(e) => updateQuestion(question.id, 'question', e.target.value)}
-                  placeholder="質問を入力してください（例: チームワークで重視することは何ですか？）"
-                  rows={2}
-                  className="form-control"
-                />
-                <div className="d-flex justify-content-end mt-2">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <label className="form-label fw-bold mb-0">質問内容</label>
                   <ProofreadingButton
                     text={question.question}
                     onProofreadComplete={(correctedText) => {
@@ -190,19 +183,19 @@ const QuestionsManager: React.FC<QuestionsManagerProps> = ({ questions, onChange
                     buttonText="質問を校正"
                   />
                 </div>
+                <textarea
+                  value={question.question}
+                  onChange={(e) => updateQuestion(question.id, 'question', e.target.value)}
+                  placeholder="質問を入力してください（例: チームワークで重視することは何ですか？）"
+                  rows={2}
+                  className="form-control"
+                />
               </div>
 
               {/* 回答入力フィールド */}
               <div>
-                <label className="form-label fw-bold">回答内容</label>
-                <textarea
-                  value={question.answer}
-                  onChange={(e) => updateQuestion(question.id, 'answer', e.target.value)}
-                  placeholder="回答を入力してください"
-                  rows={3}
-                  className="form-control"
-                />
-                <div className="d-flex justify-content-end mt-2">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <label className="form-label fw-bold mb-0">回答内容</label>
                   <ProofreadingButton
                     text={question.answer}
                     onProofreadComplete={(correctedText) => {
@@ -212,6 +205,13 @@ const QuestionsManager: React.FC<QuestionsManagerProps> = ({ questions, onChange
                     buttonText="回答を校正"
                   />
                 </div>
+                <textarea
+                  value={question.answer}
+                  onChange={(e) => updateQuestion(question.id, 'answer', e.target.value)}
+                  placeholder="回答を入力してください"
+                  rows={3}
+                  className="form-control"
+                />
               </div>
             </div>
           </div>
