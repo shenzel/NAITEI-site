@@ -381,9 +381,8 @@ export default function Home() {
               <input type="text" name="skill" value={inputs.skill.join(', ')} onChange={handleSkillChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>自己PR</label>
-              <textarea name="self_pr" value={inputs.self_pr} onChange={handleChange} rows={8} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit' }} />
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '5px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{fontWeight: 'bold'}}>自己PR</label>
                 <ProofreadingButton
                   text={inputs.self_pr}
                   onProofreadComplete={(correctedText) => {
@@ -395,6 +394,7 @@ export default function Home() {
                   className="btn-sm"
                 />
               </div>
+              <textarea name="self_pr" value={inputs.self_pr} onChange={handleChange} rows={8} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit' }} />
             </div>
             <QuestionsManager
               questions={inputs.questions}
