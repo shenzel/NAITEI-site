@@ -39,7 +39,7 @@ export default function Home() {
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isPreviewVisible, setIsPreviewVisible] = useState(true);
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('stylish');
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('first');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
