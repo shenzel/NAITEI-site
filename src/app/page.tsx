@@ -9,6 +9,7 @@ import ProofreadingButton from '../components/ProofreadingButton';
 
 import LogoutButton from "@/components/LogoutButton"
 import QuestionsManager, { Question } from '../components/QuestionsManager';
+import RequireLogin from "@/components/RequireLogin";
 
 
 export default function Home() {
@@ -268,38 +269,11 @@ export default function Home() {
  
 
 
-  // ログインしていない場合の表示
-  if (!session) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <p>このアプリを利用するにはログインが必要です。</p>
-        <button onClick={() => signIn("github")} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-          Sign in with GitHub
-        </button>
-
-        <button onClick={() => signIn("google")} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-        Sign in with Google
-      </button>
-      <hr />
-
-      <h3>Emailとパスワードでログイン</h3>
-      <form onSubmit={async (e) => {
-        e.preventDefault();
-        const email = e.currentTarget.email.value;
-        const password = e.currentTarget.password.value;
-        await signIn('credentials', { email, password, redirect: false });
-      }}>
-        <input name="email" type="email" placeholder="Email" />
-        <input name="password" type="password" placeholder="Password" />
-        <button type="submit">Sign in</button>
-      </form>
-       <p style={{marginTop: '20px'}}><Link href="/register">アカウントをお持ちでないですか？ 新規登録</Link></p>
-      </div>
-    );
-  }
+  
 
   
   return (
+    <RequireLogin>
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
       <div style={{ flex: 1, padding: '30px', overflowY: 'auto', backgroundColor: '#fdfdfd', color: '#000000' }}>
         <div style={{ maxWidth: isPreviewVisible ? '600px' : '800px', margin: '0 auto', transition: 'max-width 0.3s' }}>
@@ -381,8 +355,9 @@ export default function Home() {
               <input type="text" name="skill" value={inputs.skill.join(', ')} onChange={handleSkillChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{fontWeight: 'bold'}}>自己PR</label>
+              <label style={{fontWeight: 'bold'}}>自己PR</label>
+              <textarea name="self_pr" value={inputs.self_pr} onChange={handleChange} rows={8} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit' }} />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '5px' }}>
                 <ProofreadingButton
                   text={inputs.self_pr}
                   onProofreadComplete={(correctedText) => {
@@ -394,7 +369,6 @@ export default function Home() {
                   className="btn-sm"
                 />
               </div>
-              <textarea name="self_pr" value={inputs.self_pr} onChange={handleChange} rows={8} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit' }} />
             </div>
             <QuestionsManager
               questions={inputs.questions}
@@ -440,6 +414,7 @@ export default function Home() {
         </div>
       )}
     </div>
+    </RequireLogin>
   );
 }
 
