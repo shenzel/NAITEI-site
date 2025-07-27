@@ -395,8 +395,8 @@ export default function RequireLogin({ children }: { children: React.ReactNode }
               <div style={styles.rightPanelContent}>
                 <h2 style={styles.rightPanelTitle}>みなさんこんにちは！</h2>
                 <p style={styles.rightPanelText}>Naitei-Site</p>
-                <Link href="/register" legacyBehavior>
-                  <a
+                  <Link
+                    href="/register"
                     style={styles.signUpLink}
                     onMouseEnter={(e) => {
                       (e.currentTarget.style.backgroundColor = 'white');
@@ -408,8 +408,7 @@ export default function RequireLogin({ children }: { children: React.ReactNode }
                     }}
                   >
                     SIGN UP
-                  </a>
-                </Link>
+                  </Link>
               </div>
             </div>
           </div>
