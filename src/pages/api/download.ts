@@ -1,9 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import JSZip from 'jszip';
 
+interface Inputs {
+  yourName: string;
+  strengthAndWeakness: string;
+  // 他のプロパティもここに追加
+}
+
 // この関数は、入力内容からHTMLコンテンツを生成する例です。
 // 実際のテンプレートに応じて内容は調整してください。
-const generateHtml = (inputs: any): string => {
+const generateHtml = (inputs: Inputs): string => {
   return `
     <!DOCTYPE html>
     <html lang="ja">
