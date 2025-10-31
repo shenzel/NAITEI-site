@@ -1,10 +1,10 @@
 "use client";
-import {useSession, signIn, signOut} from "next-auth/react"
+import {useSession} from "next-auth/react"
 
 import { useState, useEffect, ChangeEvent } from 'react';
 import { templates, TemplateKey } from '../../lib/templates';
 import JSZip from 'jszip';
-import Link from "next/link";
+
 import ProofreadingButton from '../components/ProofreadingButton';
 
 import LogoutButton from "@/components/LogoutButton"
@@ -144,7 +144,7 @@ export default function Home() {
     if (previewUrl) { URL.revokeObjectURL(previewUrl); }
     setPreviewUrl(URL.createObjectURL(blob));
 
-  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents]);
+  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents, previewUrl]);
 
 
   const handleSave = async () => {

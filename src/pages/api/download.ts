@@ -66,7 +66,8 @@ export default async function handler(
     res.setHeader('Content-Disposition', 'attachment; filename=portfolio.zip');
     res.send(zipBuffer);
 
-  } catch (error) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_error) {
     res.status(500).json({ error: 'ファイルの生成に失敗しました' });
   }
 }
