@@ -1,15 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import JSZip from 'jszip';
 
-interface Inputs {
-  yourName: string;
-  strengthAndWeakness: string;
-  // 他のプロパティもここに追加
-}
-
 // この関数は、入力内容からHTMLコンテンツを生成する例です。
 // 実際のテンプレートに応じて内容は調整してください。
-const generateHtml = (inputs: Inputs): string => {
+const generateHtml = (inputs: any): string => {
   return `
     <!DOCTYPE html>
     <html lang="ja">
@@ -66,8 +60,7 @@ export default async function handler(
     res.setHeader('Content-Disposition', 'attachment; filename=portfolio.zip');
     res.send(zipBuffer);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_error) {
+  } catch (error) {
     res.status(500).json({ error: 'ファイルの生成に失敗しました' });
   }
 }

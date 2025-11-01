@@ -37,8 +37,7 @@ export default async function handler(
     });
 
     res.status(201).json({ message: 'User created successfully' });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_error) {
+  } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
   }
 }

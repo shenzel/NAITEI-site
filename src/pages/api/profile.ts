@@ -27,8 +27,7 @@ export default async function handler(
           return res.status(404).json({ message: 'データが見つかりません' });
         }
         return res.status(200).json(profileData);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (_error) {
+      } catch (error) {
         return res.status(500).json({ error: 'データの取得に失敗しました' });
       }
 
@@ -38,8 +37,7 @@ export default async function handler(
         const profileData = req.body;
         await kv.set(userKey, profileData);
         return res.status(200).json({ message: '保存しました' });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (_error) {
+      } catch (error) {
         return res.status(500).json({ error: '保存に失敗しました' });
       }
 
@@ -48,8 +46,7 @@ export default async function handler(
       try {
         await kv.del(userKey);
         return res.status(200).json({ message: '削除しました' });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (_error) {
+      } catch (error) {
         return res.status(500).json({ error: '削除に失敗しました' });
       }
 
