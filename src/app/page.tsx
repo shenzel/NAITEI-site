@@ -145,7 +145,8 @@ export default function Home() {
     if (previewUrl) { URL.revokeObjectURL(previewUrl); }
     setPreviewUrl(URL.createObjectURL(blob));
 
-  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents, previewUrl]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents]);
 
 
   const handleSave = async () => {
