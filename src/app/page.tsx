@@ -44,6 +44,9 @@ export default function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('first');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  
+  // Debounced inputs for preview updates
+  const [debouncedInputs, setDebouncedInputs] = useState(inputs);
 
   useEffect(() => {
    if (status === 'authenticated' && session) {
@@ -85,6 +88,7 @@ export default function Home() {
           }
           
           setInputs(content);
+          setDebouncedInputs(content);
           setSelectedTemplate(data.templateId);
         } else if (res.status === 404) {
           // データがまだ保存されていない場合は何もしない
@@ -101,6 +105,14 @@ export default function Home() {
   }
 }, [status, session]); // statusかsessionが変わった時に実行
 
+  // Debounce inputs for preview updates
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedInputs(inputs);
+    }, 300); // 300ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [inputs]);
 
   useEffect(() => {
     const fetchAllCss = async () => {
@@ -129,7 +141,7 @@ export default function Home() {
     // CSSがまだ読み込めていない場合は何もしない
     if (!css) return;
 
-    const { html, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
+    const { html, js } = templates[selectedTemplate].generate(debouncedInputs, imageFile?.name);
     let previewHtml = html
       .replace('<link rel=\"stylesheet\" href=\"style.css\">', `<style>${css}</style>`)
       .replace('<script src=\"script.js\"></script>', `<script>${js}</script>`);
@@ -145,7 +157,8 @@ export default function Home() {
     if (previewUrl) { URL.revokeObjectURL(previewUrl); }
     setPreviewUrl(URL.createObjectURL(blob));
 
-  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents, previewUrl]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedInputs, selectedTemplate, imageFile, imageUrl, cssContents]);
 
 
   const handleSave = async () => {
