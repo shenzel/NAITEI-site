@@ -7,6 +7,7 @@ import JSZip from 'jszip';
 import Image from 'next/image';
 
 import ProofreadingButton from '../components/ProofreadingButton';
+import ProfileInput from '../components/ProfileInput';
 
 import LogoutButton from "@/components/LogoutButton"
 import QuestionsManager, { Question } from '../components/QuestionsManager';
@@ -26,7 +27,7 @@ export default function Home() {
     dream: 'データサイエンティスト',
     hobby: ['競技プログラミング', '釣り'],
     skill: ['Python', 'HTML', 'CSS', 'JavaScript'],
-    self_pr: '投資プログラムを開発し、コンテストで入賞したことです。\n開発期間は6か月、Pythonを使って個人で開発しました。',
+    self_pr: '投資プログラムを開発し、コンテストで入賞したことです.\n開発期間は6か月、Pythonを使って個人で開発しました。',
     questions: [
       {
         id: '1',
@@ -131,22 +132,21 @@ export default function Home() {
 
     const { html, js } = templates[selectedTemplate].generate(inputs, imageFile?.name);
     let previewHtml = html
-      .replace('<link rel=\"stylesheet\" href=\"style.css\">', `<style>${css}</style>`)
-      .replace('<script src=\"script.js\"></script>', `<script>${js}</script>`);
+      .replace('<link rel="stylesheet" href="style.css">', `<style>${css}</style>`)
+      .replace('<script src="script.js"></script>', `<script>${js}</script>`);
     
     // 画像パスの置換処理
     const origin = window.location.origin;
     if (imageFile && imageUrl) {
-      previewHtml = previewHtml.replace(`src=\"img/${imageFile.name}\"`, `src=\"${imageUrl}\"`);
+      previewHtml = previewHtml.replace(`src="img/${imageFile.name}"`, `src="${imageUrl}"`);
     }
-    previewHtml = previewHtml.replace(/src=\"img\//g, `src=\"${origin}/img/`);
+    previewHtml = previewHtml.replace(/src="img\//g, `src="${origin}/img/`);
 
     const blob = new Blob([previewHtml], { type: 'text/html' });
     if (previewUrl) { URL.revokeObjectURL(previewUrl); }
     setPreviewUrl(URL.createObjectURL(blob));
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- previewUrl intentionally excluded to prevent infinite loop
-  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents]);
+  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents, previewUrl]);
 
 
   const handleSave = async () => {
@@ -325,26 +325,11 @@ export default function Home() {
           <h2 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>プロフィール情報</h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>氏名</label>
-              <input type="text" name="yourName" value={inputs.yourName} onChange={handleChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>出身地</label>
-              <input type="text" name="hometown" value={inputs.hometown} onChange={handleChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>大学</label>
-              <input type="text" name="university" value={inputs.university} onChange={handleChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>学部・学科</label>
-              <input type="text" name="faculty" value={inputs.faculty} onChange={handleChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>将来の夢</label>
-              <input type="text" name="dream" value={inputs.dream} onChange={handleChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
-            </div>
+            <ProfileInput label="氏名" name="yourName" value={inputs.yourName} onChange={handleChange} />
+            <ProfileInput label="出身地" name="hometown" value={inputs.hometown} onChange={handleChange} />
+            <ProfileInput label="大学" name="university" value={inputs.university} onChange={handleChange} />
+            <ProfileInput label="学部・学科" name="faculty" value={inputs.faculty} onChange={handleChange} />
+            <ProfileInput label="将来の夢" name="dream" value={inputs.dream} onChange={handleChange} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{fontWeight: 'bold'}}>趣味 (カンマ区切りで入力)</label>
               <input type="text" name="hobby" value={inputs.hobby.join(', ')} onChange={handleHobbyChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
