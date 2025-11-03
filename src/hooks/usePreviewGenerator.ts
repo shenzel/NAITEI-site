@@ -27,24 +27,29 @@ export const usePreviewGenerator = (
     }
     previewHtml = previewHtml.replace(/src="img\//g, `src="${origin}/img/`);
 
+    let urlToRevoke: string | null = null;
+
     // Only update the blob URL if the HTML content has actually changed
     if (previewHtml !== previousHtmlRef.current) {
       previousHtmlRef.current = previewHtml;
       
       const blob = new Blob([previewHtml], { type: 'text/html' });
       
-      // It's important to revoke the previous URL to avoid memory leaks.
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+      // Store the old URL for cleanup and revoke it
+      urlToRevoke = previewUrl;
+      if (urlToRevoke) {
+        URL.revokeObjectURL(urlToRevoke);
       }
 
-      setPreviewUrl(URL.createObjectURL(blob));
+      const newUrl = URL.createObjectURL(blob);
+      setPreviewUrl(newUrl);
+      urlToRevoke = newUrl;
     }
 
     // Cleanup function to revoke the URL when the component unmounts.
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+      if (urlToRevoke) {
+        URL.revokeObjectURL(urlToRevoke);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
