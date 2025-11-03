@@ -11,6 +11,7 @@ import ProfileInput from '../components/ProfileInput';
 import TextAreaInput from '../components/TextAreaInput';
 import CommaSeparatedInput from '../components/CommaSeparatedInput';
 import ImageUploader from '../components/ImageUploader';
+import ActionButtons from '../components/ActionButtons';
 
 import LogoutButton from "@/components/LogoutButton"
 import QuestionsManager, { Question } from '../components/QuestionsManager';
@@ -353,20 +354,7 @@ export default function Home() {
           </div>
 
 
-          <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
-            <button
-              onClick={handleSave}
-              style={{ flex: 1, padding: '15px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '5px' }}
-            >
-              💾 保存
-            </button>
-            <button
-              onClick={handleDownload}
-              style={{ padding: '15px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', width: '100%' }}
-            >
-              ZIPファイルで一括ダウンロード 📁
-            </button>
-          </div>
+          <ActionButtons onSave={handleSave} onDownload={handleDownload} />
         </div>
       </div>
 
