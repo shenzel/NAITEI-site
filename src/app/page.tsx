@@ -10,6 +10,7 @@ import ProofreadingButton from '../components/ProofreadingButton';
 import ProfileInput from '../components/ProfileInput';
 import TextAreaInput from '../components/TextAreaInput';
 import CommaSeparatedInput from '../components/CommaSeparatedInput';
+import ImageUploader from '../components/ImageUploader';
 
 import LogoutButton from "@/components/LogoutButton"
 import QuestionsManager, { Question } from '../components/QuestionsManager';
@@ -29,7 +30,7 @@ export default function Home() {
     dream: 'データサイエンティスト',
     hobby: ['競技プログラミング', '釣り'],
     skill: ['Python', 'HTML', 'CSS', 'JavaScript'],
-    self_pr: '投資プログラムを開発し、コンテストで入賞したことです.\n開発期間は6か月、Pythonを使って個人で開発しました.',
+    self_pr: '投資プログラムを開発し、コンテストで入賞したことです。\n開発期間は6か月、Pythonを使って個人で開発しました。',
     questions: [
       {
         id: '1',
@@ -292,26 +293,11 @@ export default function Home() {
 
           <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '20px 0' }} />
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '25px' }}>
-            <label style={{fontWeight: 'bold'}}>プロフィール画像</label>
-            <input
-              id="image-upload-input"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-            {imageUrl && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '10px' }}>
-                <Image src={imageUrl} alt="選択した画像" width={100} height={100} style={{ objectFit: 'cover', borderRadius: '8px' }} unoptimized />
-                <button
-                  onClick={handleImageDelete}
-                  style={{ padding: '5px 10px', cursor: 'pointer', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px' }}
-                >
-                  画像を削除
-                </button>
-              </div>
-            )}
-          </div>
+          <ImageUploader
+            imageUrl={imageUrl}
+            onImageChange={handleImageChange}
+            onImageDelete={handleImageDelete}
+          />
 
           <h2 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>プロフィール情報</h2>
           
