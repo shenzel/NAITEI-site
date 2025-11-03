@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { templates, TemplateKey } from '../../lib/templates';
 import { Inputs } from '@/types/portfolio';
 
@@ -10,6 +10,7 @@ export const usePreviewGenerator = (
   cssContents: Record<string, string>
 ) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const previousHtmlRef = useRef<string>('');
 
   useEffect(() => {
     const css = cssContents[selectedTemplate] || '';
@@ -26,16 +27,21 @@ export const usePreviewGenerator = (
     }
     previewHtml = previewHtml.replace(/src="img\//g, `src="${origin}/img/`);
 
-    const blob = new Blob([previewHtml], { type: 'text/html' });
-    
-    // It's important to revoke the previous URL to avoid memory leaks.
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
+    // Only update the blob URL if the HTML content has actually changed
+    if (previewHtml !== previousHtmlRef.current) {
+      previousHtmlRef.current = previewHtml;
+      
+      const blob = new Blob([previewHtml], { type: 'text/html' });
+      
+      // It's important to revoke the previous URL to avoid memory leaks.
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      setPreviewUrl(URL.createObjectURL(blob));
     }
 
-    setPreviewUrl(URL.createObjectURL(blob));
-
-    // Cleanup function to revoke the URL when the component unmounts or dependencies change.
+    // Cleanup function to revoke the URL when the component unmounts.
     return () => {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
