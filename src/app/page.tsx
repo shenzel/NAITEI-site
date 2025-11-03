@@ -8,6 +8,8 @@ import Image from 'next/image';
 
 import ProofreadingButton from '../components/ProofreadingButton';
 import ProfileInput from '../components/ProfileInput';
+import TextAreaInput from '../components/TextAreaInput';
+import CommaSeparatedInput from '../components/CommaSeparatedInput';
 
 import LogoutButton from "@/components/LogoutButton"
 import QuestionsManager, { Question } from '../components/QuestionsManager';
@@ -27,7 +29,7 @@ export default function Home() {
     dream: 'データサイエンティスト',
     hobby: ['競技プログラミング', '釣り'],
     skill: ['Python', 'HTML', 'CSS', 'JavaScript'],
-    self_pr: '投資プログラムを開発し、コンテストで入賞したことです.\n開発期間は6か月、Pythonを使って個人で開発しました。',
+    self_pr: '投資プログラムを開発し、コンテストで入賞したことです.\n開発期間は6か月、Pythonを使って個人で開発しました.',
     questions: [
       {
         id: '1',
@@ -145,9 +147,8 @@ export default function Home() {
     const blob = new Blob([previewHtml], { type: 'text/html' });
     if (previewUrl) { URL.revokeObjectURL(previewUrl); }
     setPreviewUrl(URL.createObjectURL(blob));
-
-  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents, previewUrl]);
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputs, selectedTemplate, imageFile, imageUrl, cssContents]);
 
   const handleSave = async () => {
   // ログインしていない場合は処理を中断
@@ -199,16 +200,6 @@ export default function Home() {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setInputs((prevInputs) => ({ ...prevInputs, [name]: value }));
-  };
-
-  const handleHobbyChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setInputs(prev => ({ ...prev, hobby: value.split(',').map(item => item.trim()) }));
-  };
-
-  const handleSkillChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setInputs(prev => ({ ...prev, skill: value.split(',').map(item => item.trim()) }));
   };
 
   const handleDownload = async () => {
@@ -330,30 +321,39 @@ export default function Home() {
             <ProfileInput label="大学" name="university" value={inputs.university} onChange={handleChange} />
             <ProfileInput label="学部・学科" name="faculty" value={inputs.faculty} onChange={handleChange} />
             <ProfileInput label="将来の夢" name="dream" value={inputs.dream} onChange={handleChange} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>趣味 (カンマ区切りで入力)</label>
-              <input type="text" name="hobby" value={inputs.hobby.join(', ')} onChange={handleHobbyChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>スキル (カンマ区切りで入力)</label>
-              <input type="text" name="skill" value={inputs.skill.join(', ')} onChange={handleSkillChange} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{fontWeight: 'bold'}}>自己PR</label>
-              <textarea name="self_pr" value={inputs.self_pr} onChange={handleChange} rows={8} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit' }} />
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '5px' }}>
-                <ProofreadingButton
-                  text={inputs.self_pr}
-                  onProofreadComplete={(correctedText) => {
-                    setInputs(prev => ({
-                      ...prev,
-                      self_pr: correctedText
-                    }));
-                  }}
-                  className="btn-sm"
-                />
-              </div>
-            </div>
+            <CommaSeparatedInput
+              label="趣味 (カンマ区切りで入力)"
+              name="hobby"
+              value={inputs.hobby}
+              onChange={(newHobby) => {
+                setInputs(prev => ({ ...prev, hobby: newHobby }));
+              }}
+            />
+            <CommaSeparatedInput
+              label="スキル (カンマ区切りで入力)"
+              name="skill"
+              value={inputs.skill}
+              onChange={(newSkill) => {
+                setInputs(prev => ({ ...prev, skill: newSkill }));
+              }}
+            />
+            <TextAreaInput
+              label="自己PR"
+              name="self_pr"
+              value={inputs.self_pr}
+              onChange={handleChange}
+            >
+              <ProofreadingButton
+                text={inputs.self_pr}
+                onProofreadComplete={(correctedText) => {
+                  setInputs(prev => ({
+                    ...prev,
+                    self_pr: correctedText
+                  }));
+                }}
+                className="btn-sm"
+              />
+            </TextAreaInput>
             <QuestionsManager
               questions={inputs.questions}
               onChange={(questions) => {
