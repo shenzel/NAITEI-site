@@ -6,7 +6,6 @@ import { templates, TemplateKey } from '../../lib/templates';
 import { Inputs } from '@/types/portfolio';
 import { Question } from '@/components/QuestionsManager';
 import { usePortfolioDownloader } from './usePortfolioDownloader';
-import { usePreviewGenerator } from './usePreviewGenerator';
 
 export const usePortfolioManager = () => {
   const { data: session, status } = useSession();
@@ -35,8 +34,7 @@ export const usePortfolioManager = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  // Custom hooks for separated logic
-  const { previewUrl } = usePreviewGenerator(inputs, selectedTemplate, imageFile, imageUrl, cssContents);
+  // Custom hook for download logic
   const { handleDownload } = usePortfolioDownloader(inputs, selectedTemplate, imageFile, cssContents);
 
   useEffect(() => {
@@ -162,7 +160,7 @@ export const usePortfolioManager = () => {
     status,
     inputs,
     setInputs,
-    previewUrl,
+    cssContents,
     isPreviewVisible,
     setIsPreviewVisible,
     selectedTemplate,

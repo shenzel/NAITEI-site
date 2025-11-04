@@ -11,7 +11,7 @@ export default function Home() {
   const {
     inputs,
     setInputs,
-    previewUrl,
+    cssContents,
     isPreviewVisible,
     setIsPreviewVisible,
     selectedTemplate,
@@ -50,7 +50,14 @@ export default function Home() {
           handleDownload={handleDownload}
         />
         <LogoutButton />
-        {isPreviewVisible && <Preview previewUrl={previewUrl} />}
+        {isPreviewVisible && (
+          <Preview
+            inputs={inputs}
+            imageUrl={imageUrl}
+            selectedTemplate={selectedTemplate}
+            cssContents={cssContents}
+          />
+        )}
       </div>
     </RequireLogin>
   );
