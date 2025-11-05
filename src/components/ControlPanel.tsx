@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent } from 'react';
-import { TemplateKey, templates } from '../../lib/templates';
+import { TemplateKey, templates } from '@/lib/templates';
 import { Question } from './QuestionsManager';
 import { Inputs } from '@/types/portfolio';
 import ImageUploader from './ImageUploader';

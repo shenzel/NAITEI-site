@@ -2,7 +2,7 @@
 
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useSession } from 'next-auth/react';
-import { templates, TemplateKey } from '../../lib/templates';
+import { templates, TemplateKey } from '@/lib/templates';
 import { Inputs } from '@/types/portfolio';
 import { Question } from '@/components/QuestionsManager';
 import { usePortfolioDownloader } from './usePortfolioDownloader';

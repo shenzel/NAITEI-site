@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { templates, TemplateKey } from '../../lib/templates';
+import { templates, TemplateKey } from '@/lib/templates';
 import { Inputs } from '@/types/portfolio';
 
 export const usePortfolioDownloader = (
