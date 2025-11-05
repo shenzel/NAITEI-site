@@ -1,6 +1,6 @@
 "use client";
 
-import { templates, TemplateKey } from '../../lib/templates';
+import { templates, TemplateKey } from '@/lib/templates';
 import { Inputs } from '@/types/portfolio';
 
 interface PreviewProps {
