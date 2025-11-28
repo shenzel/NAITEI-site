@@ -85,19 +85,30 @@ export const usePortfolioManager = () => {
 
   useEffect(() => {
     const cssId = 'portfolio-style';
+    let isCancelled = false;
 
-    // Remove previous style
+    // Get existing link element (will be removed after new one loads)
     const existingLink = document.getElementById(cssId);
-    if (existingLink) {
-      document.head.removeChild(existingLink);
-    }
 
-    // Add new style
+    // Add new style with temporary ID to avoid conflicts
     const path = templates[selectedTemplate].cssPath;
     const link = document.createElement('link');
-    link.id = cssId;
+    link.id = cssId + '-new';
     link.rel = 'stylesheet';
     link.href = path;
+    
+    const handleStylesheetReady = () => {
+      if (isCancelled) return;
+      existingLink?.remove();
+      // Update the ID after removing old link
+      link.id = cssId;
+    };
+    
+    // Remove old stylesheet only after new one has loaded to prevent FOUC
+    link.onload = handleStylesheetReady;
+    // Also handle errors to clean up old stylesheet
+    link.onerror = handleStylesheetReady;
+    
     document.head.appendChild(link);
 
     // Fetch and store CSS content for download if not already cached
@@ -107,7 +118,9 @@ export const usePortfolioManager = () => {
           const response = await fetch(path);
           if (response.ok) {
             const text = await response.text();
-            setCssContents(prev => ({ ...prev, [selectedTemplate]: text }));
+            if (!isCancelled) {
+              setCssContents(prev => ({ ...prev, [selectedTemplate]: text }));
+            }
           }
         } catch (error) {
           console.error(`Failed to fetch css for ${selectedTemplate}:`, error);
@@ -115,10 +128,14 @@ export const usePortfolioManager = () => {
       };
       fetchCss();
     }
+    
     return () => {
-      const linkToRemove = document.getElementById(cssId);
-      if (linkToRemove) {
-        document.head.removeChild(linkToRemove);
+      isCancelled = true;
+      link.onload = null;
+      link.onerror = null;
+      // Remove the link element if it was added but hasn't loaded yet
+      if (link.parentNode && link.id !== cssId) {
+        link.remove();
       }
     };
   }, [selectedTemplate]);
