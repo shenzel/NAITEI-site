@@ -85,6 +85,7 @@ export const usePortfolioManager = () => {
 
   useEffect(() => {
     const cssId = 'portfolio-style';
+    let isCancelled = false;
 
     // Get existing link element (will be removed after new one loads)
     const existingLink = document.getElementById(cssId);
@@ -96,14 +97,19 @@ export const usePortfolioManager = () => {
     link.rel = 'stylesheet';
     link.href = path;
     
-    // Remove old stylesheet only after new one has loaded to prevent FOUC
-    link.onload = () => {
+    const handleStylesheetReady = () => {
+      if (isCancelled) return;
       if (existingLink && existingLink.parentNode) {
         existingLink.parentNode.removeChild(existingLink);
       }
       // Update the ID after removing old link
       link.id = cssId;
     };
+    
+    // Remove old stylesheet only after new one has loaded to prevent FOUC
+    link.onload = handleStylesheetReady;
+    // Also handle errors to clean up old stylesheet
+    link.onerror = handleStylesheetReady;
     
     document.head.appendChild(link);
 
@@ -114,7 +120,9 @@ export const usePortfolioManager = () => {
           const response = await fetch(path);
           if (response.ok) {
             const text = await response.text();
-            setCssContents(prev => ({ ...prev, [selectedTemplate]: text }));
+            if (!isCancelled) {
+              setCssContents(prev => ({ ...prev, [selectedTemplate]: text }));
+            }
           }
         } catch (error) {
           console.error(`Failed to fetch css for ${selectedTemplate}:`, error);
@@ -122,6 +130,12 @@ export const usePortfolioManager = () => {
       };
       fetchCss();
     }
+    
+    return () => {
+      isCancelled = true;
+      link.onload = null;
+      link.onerror = null;
+    };
   }, [selectedTemplate]);
 
   const handleSave = async () => {
