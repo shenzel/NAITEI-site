@@ -21,7 +21,11 @@ const Preview: React.FC<PreviewProps> = React.memo(({
   const css = cssContents[selectedTemplate] || '';
 
   if (!TemplateComponent || !css) {
-    return <div>Loading Preview...</div>;
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '600px', width: '100%' }}>
+        <div className="loader"></div>
+      </div>
+    );
   }
 
   return (
