@@ -51,12 +51,15 @@ export default function Home() {
         />
         <LogoutButton />
         {isPreviewVisible && (
-          <Preview
-            inputs={inputs}
-            imageUrl={imageUrl}
-            selectedTemplate={selectedTemplate}
-            cssContents={cssContents}
-          />
+          <div style={{ flex: 1, padding: '20px', backgroundColor: '#e9ecef', overflow: 'auto' }}>
+            <h2 style={{ textAlign: 'center', color: '#495057' }}>プレビュー</h2>
+            <Preview
+              inputs={inputs}
+              imageUrl={imageUrl}
+              selectedTemplate={selectedTemplate}
+              cssContents={cssContents}
+            />
+          </div>
         )}
       </div>
     </RequireLogin>

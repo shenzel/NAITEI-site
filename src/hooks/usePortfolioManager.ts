@@ -84,23 +84,61 @@ export const usePortfolioManager = () => {
   }, [status, session]);
 
   useEffect(() => {
-    const fetchAllCss = async () => {
-      const allCss: Record<string, string> = {};
-      for (const key in templates) {
-        const path = templates[key as TemplateKey].cssPath;
+    const cssId = 'portfolio-style';
+    let isCancelled = false;
+
+    // Get existing link element (will be removed after new one loads)
+    const existingLink = document.getElementById(cssId);
+
+    // Add new style with temporary ID to avoid conflicts
+    const path = templates[selectedTemplate].cssPath;
+    const link = document.createElement('link');
+    link.id = cssId + '-new';
+    link.rel = 'stylesheet';
+    link.href = path;
+    
+    const handleStylesheetReady = () => {
+      if (isCancelled) return;
+      existingLink?.remove();
+      // Update the ID after removing old link
+      link.id = cssId;
+    };
+    
+    // Remove old stylesheet only after new one has loaded to prevent FOUC
+    link.onload = handleStylesheetReady;
+    // Also handle errors to clean up old stylesheet
+    link.onerror = handleStylesheetReady;
+    
+    document.head.appendChild(link);
+
+    // Fetch and store CSS content for download if not already cached
+    if (!cssContents[selectedTemplate]) {
+      const fetchCss = async () => {
         try {
           const response = await fetch(path);
           if (response.ok) {
-            allCss[key] = await response.text();
+            const text = await response.text();
+            if (!isCancelled) {
+              setCssContents(prev => ({ ...prev, [selectedTemplate]: text }));
+            }
           }
         } catch (error) {
-          console.error(`Failed to fetch css for ${key}:`, error);
+          console.error(`Failed to fetch css for ${selectedTemplate}:`, error);
         }
+      };
+      fetchCss();
+    }
+    
+    return () => {
+      isCancelled = true;
+      link.onload = null;
+      link.onerror = null;
+      // Remove the link element if it was added but hasn't loaded yet
+      if (link.parentNode && link.id !== cssId) {
+        link.remove();
       }
-      setCssContents(allCss);
     };
-    fetchAllCss();
-  }, []);
+  }, [selectedTemplate]);
 
   const handleSave = async () => {
     if (!session) {
