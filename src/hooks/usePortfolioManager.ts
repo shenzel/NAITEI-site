@@ -99,9 +99,7 @@ export const usePortfolioManager = () => {
     
     const handleStylesheetReady = () => {
       if (isCancelled) return;
-      if (existingLink && existingLink.parentNode) {
-        existingLink.parentNode.removeChild(existingLink);
-      }
+      existingLink?.remove();
       // Update the ID after removing old link
       link.id = cssId;
     };
@@ -135,6 +133,10 @@ export const usePortfolioManager = () => {
       isCancelled = true;
       link.onload = null;
       link.onerror = null;
+      // Remove the link element if it was added but hasn't loaded yet
+      if (link.parentNode && link.id !== cssId) {
+        link.remove();
+      }
     };
   }, [selectedTemplate]);
 
