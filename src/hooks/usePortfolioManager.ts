@@ -115,7 +115,7 @@ export const usePortfolioManager = () => {
       };
       fetchCss();
     }
-  }, [selectedTemplate, cssContents]);
+  }, [selectedTemplate]);
 
   const handleSave = async () => {
     if (!session) {
