@@ -86,18 +86,25 @@ export const usePortfolioManager = () => {
   useEffect(() => {
     const cssId = 'portfolio-style';
 
-    // Remove previous style
+    // Get existing link element (will be removed after new one loads)
     const existingLink = document.getElementById(cssId);
-    if (existingLink) {
-      document.head.removeChild(existingLink);
-    }
 
-    // Add new style
+    // Add new style with temporary ID to avoid conflicts
     const path = templates[selectedTemplate].cssPath;
     const link = document.createElement('link');
-    link.id = cssId;
+    link.id = cssId + '-new';
     link.rel = 'stylesheet';
     link.href = path;
+    
+    // Remove old stylesheet only after new one has loaded to prevent FOUC
+    link.onload = () => {
+      if (existingLink && existingLink.parentNode) {
+        existingLink.parentNode.removeChild(existingLink);
+      }
+      // Update the ID after removing old link
+      link.id = cssId;
+    };
+    
     document.head.appendChild(link);
 
     // Fetch and store CSS content for download if not already cached
