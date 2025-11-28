@@ -115,6 +115,12 @@ export const usePortfolioManager = () => {
       };
       fetchCss();
     }
+    return () => {
+      const linkToRemove = document.getElementById(cssId);
+      if (linkToRemove) {
+        document.head.removeChild(linkToRemove);
+      }
+    };
   }, [selectedTemplate]);
 
   const handleSave = async () => {
