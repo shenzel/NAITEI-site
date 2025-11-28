@@ -84,23 +84,38 @@ export const usePortfolioManager = () => {
   }, [status, session]);
 
   useEffect(() => {
-    const fetchAllCss = async () => {
-      const allCss: Record<string, string> = {};
-      for (const key in templates) {
-        const path = templates[key as TemplateKey].cssPath;
+    const cssId = 'portfolio-style';
+
+    // Remove previous style
+    const existingLink = document.getElementById(cssId);
+    if (existingLink) {
+      document.head.removeChild(existingLink);
+    }
+
+    // Add new style
+    const path = templates[selectedTemplate].cssPath;
+    const link = document.createElement('link');
+    link.id = cssId;
+    link.rel = 'stylesheet';
+    link.href = path;
+    document.head.appendChild(link);
+
+    // Fetch and store CSS content for download if not already cached
+    if (!cssContents[selectedTemplate]) {
+      const fetchCss = async () => {
         try {
           const response = await fetch(path);
           if (response.ok) {
-            allCss[key] = await response.text();
+            const text = await response.text();
+            setCssContents(prev => ({ ...prev, [selectedTemplate]: text }));
           }
         } catch (error) {
-          console.error(`Failed to fetch css for ${key}:`, error);
+          console.error(`Failed to fetch css for ${selectedTemplate}:`, error);
         }
-      }
-      setCssContents(allCss);
-    };
-    fetchAllCss();
-  }, []);
+      };
+      fetchCss();
+    }
+  }, [selectedTemplate, cssContents]);
 
   const handleSave = async () => {
     if (!session) {
