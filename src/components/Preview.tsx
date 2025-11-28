@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { templates, TemplateKey } from '@/lib/templates';
 import { Inputs } from '@/types/portfolio';
 
@@ -10,7 +11,7 @@ interface PreviewProps {
   cssContents: Record<string, string>;
 }
 
-const Preview: React.FC<PreviewProps> = ({
+const Preview: React.FC<PreviewProps> = React.memo(({
   inputs,
   imageUrl,
   selectedTemplate,
@@ -19,23 +20,17 @@ const Preview: React.FC<PreviewProps> = ({
   const TemplateComponent = templates[selectedTemplate].component;
   const css = cssContents[selectedTemplate] || '';
 
-  // Render null or a loading indicator if the component or css is not ready
   if (!TemplateComponent || !css) {
-    return (
-      <div style={{ flex: 1, padding: '20px', backgroundColor: '#e9ecef', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div>Loading Preview...</div>
-      </div>
-    );
+    return <div>Loading Preview...</div>;
   }
 
   return (
-    <div style={{ flex: 1, padding: '20px', backgroundColor: '#e9ecef', overflow: 'auto' }}>
-      <h2 style={{ textAlign: 'center', color: '#495057' }}>プレビュー</h2>
-      <div style={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px', padding: '20px' }}>
-        <TemplateComponent inputs={inputs} imageUrl={imageUrl} css={css} />
-      </div>
+    <div style={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px', padding: '20px' }}>
+      <TemplateComponent inputs={inputs} imageUrl={imageUrl} css={css} />
     </div>
   );
-};
+});
+
+Preview.displayName = 'Preview';
 
 export default Preview;
